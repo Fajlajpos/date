@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="cs">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <meta name="robots" content="noindex, nofollow">
+  <meta name="theme-color" content="#ffe3ee">
+  <meta name="color-scheme" content="light">
+  <title>Mám pro tebe otázku 💌</title>
+  <meta name="description" content="Klikni a odpověz 🥺">
+  <!-- Náhled odkazu v Messengeru / WhatsAppu / Instagramu (nic neprozradí) -->
+  <meta property="og:title" content="Mám pro tebe otázku 💌">
+  <meta property="og:description" content="Klikni a odpověz 🥺">
+
+  <!-- Emoji favicon 💕 -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%92%95%3C/text%3E%3C/svg%3E">
+
+  <!-- Písma z Google Fonts (s font-display: swap) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@500;600;700&display=swap">
+
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <!-- Plovoucí srdíčka a třpytky na pozadí (generuje script.js) -->
+  <div class="bg-hearts" id="bg-hearts" aria-hidden="true"></div>
+
+  <!-- Pomocný prvek pro zjištění safe-area insetů (výřez / notch) -->
+  <div class="safe-area-probe" id="safe-area-probe" aria-hidden="true"></div>
+
+  <main class="card" id="card">
+
+    <!-- ============ KROK 1: Otázka ============ -->
+    <section class="step is-active" data-step="1" aria-labelledby="question">
+      <figure class="polaroid">
+        <div class="photo" data-photo>
+          <img class="photo__img" alt="" data-text-alt="photoAlt" width="600" height="600" decoding="async">
+          <span class="photo__fallback" role="img" aria-label="Zamilovaný smajlík">🥰</span>
+        </div>
+      </figure>
+
+      <h1 class="title title--script" id="question" tabindex="-1" data-text="question">Půjdeš se mnou na rande? 🥺</h1>
+
+      <p class="taunt" id="taunt" aria-live="polite" data-text="tauntStart">Vyber si moudře 😇</p>
+
+      <div class="choice-row">
+        <button type="button" class="btn btn--yes" id="yes-btn" data-text="yesButton">ANO 💖</button>
+        <button type="button" class="btn btn--no" id="no-btn" data-text="noButton">NE</button>
+      </div>
+    </section>
+
+    <!-- ============ KROK 2: Datum a čas ============ -->
+    <section class="step" data-step="2" aria-labelledby="step2-title" hidden>
+      <h2 class="title" id="step2-title" tabindex="-1" data-text="step2Title">Yay! 🎉 Tak kdy?</h2>
+      <p class="subtitle" data-text="step2Subtitle">Vyber den a čas, který se ti hodí.</p>
+
+      <div class="fields">
+        <div class="field">
+          <label class="field__label" for="date-input" data-text="dateLabel">Datum</label>
+          <input class="field__input" type="date" id="date-input" required>
+        </div>
+        <div class="field">
+          <label class="field__label" for="time-input" data-text="timeLabel">Čas</label>
+          <input class="field__input" type="time" id="time-input" step="300" required>
+        </div>
+      </div>
+      <p class="field-error" id="datetime-error" role="alert" hidden></p>
+
+      <div class="actions">
+        <button type="button" class="btn btn--primary" id="to-step-3" disabled data-text="continue">Pokračovat →</button>
+        <button type="button" class="btn-link" data-back data-text="back">← Zpět</button>
+      </div>
+    </section>
+
+    <!-- ============ KROK 3: Co budeme dělat ============ -->
+    <section class="step" data-step="3" aria-labelledby="step3-title" hidden>
+      <h2 class="title" id="step3-title" tabindex="-1" data-text="step3Title">Na co máš chuť? 😋</h2>
+      <p class="subtitle" data-text="step3Subtitle">Klidně vyber víc možností.</p>
+
+      <!-- Karty aktivit se generují z pole ACTIVITIES ve script.js -->
+      <div class="activity-grid" id="activity-grid" role="group" aria-labelledby="step3-title"></div>
+
+      <div class="field">
+        <label class="field__label" for="other-idea" data-text="otherIdeaLabel">Nebo mě napadá něco jiného…</label>
+        <textarea class="field__input field__input--area" id="other-idea" rows="2" maxlength="500"></textarea>
+      </div>
+      <div class="field">
+        <label class="field__label" for="message" data-text="messageLabel">Vzkaz pro mě 💌</label>
+        <textarea class="field__input field__input--area" id="message" rows="2" maxlength="1000"></textarea>
+      </div>
+
+      <div class="actions">
+        <button type="button" class="btn btn--primary" id="to-step-4" disabled data-text="continue">Pokračovat →</button>
+        <button type="button" class="btn-link" data-back data-text="back">← Zpět</button>
+      </div>
+    </section>
+
+    <!-- ============ KROK 4: Shrnutí a odeslání ============ -->
+    <section class="step" data-step="4" aria-labelledby="step4-title" hidden>
+      <h2 class="title" id="step4-title" tabindex="-1" data-text="step4Title">Tak to shrneme 📝</h2>
+
+      <dl class="summary" id="summary"></dl>
+
+      <!-- Honeypot proti botům – člověk ho nevidí ani nevyplní -->
+      <input type="checkbox" name="botcheck" id="botcheck" class="honeypot" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+      <p class="send-error" id="send-error" role="alert" hidden></p>
+
+      <div class="actions">
+        <button type="button" class="btn btn--primary btn--send" id="send-btn">
+          <span class="spinner" aria-hidden="true"></span>
+          <span class="btn__label" data-text="sendButton">Odeslat 💌</span>
+        </button>
+        <button type="button" class="btn-link" data-back data-text="back">← Zpět</button>
+      </div>
+    </section>
+
+    <!-- ============ KROK 5: Děkovná obrazovka ============ -->
+    <section class="step step--thanks" data-step="5" aria-labelledby="thanks-title" hidden>
+      <figure class="polaroid polaroid--small">
+        <div class="photo" data-photo>
+          <img class="photo__img" alt="" data-text-alt="photoAlt" width="600" height="600" decoding="async">
+          <span class="photo__fallback" role="img" aria-label="Zamilovaný smajlík">🥰</span>
+        </div>
+      </figure>
+      <h2 class="title title--script" id="thanks-title" tabindex="-1" data-text="thanksTitle">Těším se! 💕</h2>
+      <p class="subtitle" data-text="thanksSubtitle">Odpověď už letí za mnou 💌</p>
+      <p class="signature" data-text="thanksSignature"></p>
+    </section>
+
+  </main>
+
+  <script src="./script.js" defer></script>
+</body>
+</html>

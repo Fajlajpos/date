@@ -1,0 +1,853 @@
+/* =========================================================
+   Rande web – styly
+   Barvy, písma a zaoblení jsou jako proměnné v :root,
+   takže je změníš na jednom místě.
+   ========================================================= */
+
+:root {
+  /* Pozadí – pastelová růžová, levandulová, broskvová */
+  --c-bg-1: #ffe1ec;
+  --c-bg-2: #f0e4ff;
+  --c-bg-3: #ffe8d6;
+
+  /* Plochy */
+  --c-surface: #ffffff;
+  --c-surface-soft: #fff5f9;
+  --c-border: #f3cddd;
+
+  /* Text */
+  --c-text: #4a1f3d;
+  --c-text-muted: #7a4a68;
+
+  /* Hlavní akcent (tlačítka) */
+  --c-primary: #d23c77;
+  --c-primary-strong: #b82a62;
+  --c-primary-soft: #ffe4ef;
+  --c-on-primary: #ffffff;
+
+  /* Doplňkové */
+  --c-lavender: #b99cf2;
+  --c-peach: #ffb89a;
+  --c-focus: #7a3cf0;
+  --c-danger: #b0243f;
+  --c-danger-soft: #fff0f3;
+
+  /* Polaroid */
+  --c-polaroid: #fffdfb;
+  --c-tape: rgba(185, 156, 242, 0.55);
+
+  /* Tvary a stíny */
+  --radius-lg: 24px;
+  --radius-md: 18px;
+  --radius-sm: 14px;
+  --shadow-card: 0 24px 60px -24px rgba(184, 42, 98, 0.35), 0 8px 20px -12px rgba(122, 60, 240, 0.18);
+  --shadow-soft: 0 6px 16px -8px rgba(184, 42, 98, 0.35);
+  --shadow-btn: 0 10px 22px -10px rgba(184, 42, 98, 0.7);
+
+  /* Písma (vždy s fallbacky) */
+  --font-body: "Quicksand", "Nunito", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-script: "Dancing Script", "Quicksand", system-ui, sans-serif;
+
+  /* Pohyb */
+  --ease-out: cubic-bezier(0.22, 0.8, 0.3, 1);
+  --dur-fast: 180ms;
+  --dur: 260ms;
+  --dur-step: 380ms;
+}
+
+/* ---------- Základ ---------- */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding:
+    max(16px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 500;
+  line-height: 1.5;
+  color: var(--c-text);
+  background-color: var(--c-bg-1);
+  background-image:
+    radial-gradient(circle at 12% 8%, rgba(255, 255, 255, 0.7) 0, transparent 38%),
+    linear-gradient(160deg, var(--c-bg-1) 0%, var(--c-bg-2) 55%, var(--c-bg-3) 100%);
+  background-attachment: fixed;
+  overflow-x: hidden;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button,
+input,
+textarea {
+  font: inherit;
+  color: inherit;
+}
+
+[hidden] {
+  display: none !important;
+}
+
+/* Nadpisy dostávají programový focus při přechodu kroků – bez rámečku */
+[tabindex="-1"]:focus {
+  outline: none;
+}
+
+/* ---------- Karta ---------- */
+.card {
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  max-width: 480px;
+  padding: 28px 20px 24px;
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  text-align: center;
+}
+
+@media (min-width: 400px) {
+  .card {
+    padding: 32px 28px 28px;
+  }
+}
+
+/* ---------- Kroky + přechody ---------- */
+.step {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 14px;
+}
+
+.step.is-active {
+  animation: step-in-forward var(--dur-step) var(--ease-out) both;
+}
+
+.step.is-active[data-dir="back"] {
+  animation-name: step-in-back;
+}
+
+@keyframes step-in-forward {
+  from { opacity: 0; transform: translate3d(24px, 0, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes step-in-back {
+  from { opacity: 0; transform: translate3d(-24px, 0, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- Nadpisy ---------- */
+.title {
+  margin: 0;
+  font-size: 1.6rem;
+  font-weight: 700;
+  line-height: 1.25;
+  color: var(--c-text);
+  text-wrap: balance;
+}
+
+.title--script {
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: clamp(2rem, 8.6vw, 2.6rem);
+  line-height: 1.25;
+  color: var(--c-primary-strong);
+}
+
+.subtitle {
+  margin: -6px 0 4px;
+  color: var(--c-text-muted);
+}
+
+/* ---------- Polaroid s fotkou (signature prvek) ---------- */
+.polaroid {
+  position: relative;
+  margin: 4px 0 6px;
+  padding: 10px 10px 30px;
+  background: var(--c-polaroid);
+  border-radius: 6px;
+  box-shadow: 0 14px 30px -14px rgba(74, 31, 61, 0.45), 0 2px 6px rgba(74, 31, 61, 0.08);
+  transform: rotate(-3deg);
+}
+
+/* Průsvitná „washi“ páska nahoře */
+.polaroid::before {
+  content: "";
+  position: absolute;
+  top: -10px;
+  left: 50%;
+  width: 72px;
+  height: 22px;
+  background: var(--c-tape);
+  border-radius: 3px;
+  transform: translateX(-50%) rotate(4deg);
+}
+
+.photo {
+  position: relative;
+  width: clamp(128px, 40vw, 176px);
+  aspect-ratio: 1 / 1;
+  overflow: hidden;
+  border-radius: 3px;
+  background: linear-gradient(135deg, var(--c-primary-soft), var(--c-bg-2));
+}
+
+.photo__img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 0;
+  transition: opacity var(--dur) ease;
+}
+
+.photo__fallback {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  font-size: clamp(3.5rem, 16vw, 4.5rem);
+  opacity: 0;
+  transition: opacity var(--dur) ease;
+}
+
+.photo.has-photo .photo__img {
+  opacity: 1;
+}
+
+.photo.no-photo .photo__img {
+  display: none;
+}
+
+.photo.no-photo .photo__fallback {
+  opacity: 1;
+}
+
+.polaroid--small {
+  padding: 8px 8px 22px;
+  transform: rotate(3deg);
+}
+
+.polaroid--small .photo {
+  width: clamp(104px, 30vw, 128px);
+}
+
+.polaroid--small .photo__fallback {
+  font-size: 3.2rem;
+}
+
+/* ---------- Hláška pod otázkou ---------- */
+.taunt {
+  margin: -4px 0 0;
+  min-height: 3em; /* rezervace na 2 řádky, ať layout neskáče */
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 600;
+  color: var(--c-text-muted);
+}
+
+.taunt.is-new {
+  animation: taunt-pop var(--dur) var(--ease-out);
+}
+
+@keyframes taunt-pop {
+  from { opacity: 0; transform: translate3d(0, 6px, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+/* ---------- Tlačítka ---------- */
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  min-height: 52px;
+  padding: 12px 26px;
+  border: 0;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 1.1rem;
+  line-height: 1.2;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    opacity var(--dur-fast) ease;
+}
+
+.btn:focus-visible,
+.btn-link:focus-visible,
+.activity:focus-visible {
+  outline: 3px solid var(--c-focus);
+  outline-offset: 3px;
+}
+
+.btn--primary,
+.btn--yes {
+  color: var(--c-on-primary);
+  background-color: var(--c-primary);
+  background-image: linear-gradient(135deg, var(--c-primary) 0%, var(--c-primary-strong) 100%);
+  box-shadow: var(--shadow-btn);
+}
+
+@media (hover: hover) {
+  .btn--primary:not(:disabled):hover {
+    transform: translateY(-2px);
+    box-shadow: 0 14px 26px -10px rgba(184, 42, 98, 0.75);
+  }
+}
+
+.btn--primary:not(:disabled):active {
+  transform: translateY(0) scale(0.97);
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.45;
+  box-shadow: none;
+}
+
+/* Řádek ANO / NE – rezervuje výšku pro zvětšené ANO (až 1.6×) */
+.choice-row {
+  position: relative;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 14px;
+  width: 100%;
+  min-height: 96px;
+}
+
+/* ANO se zvětšuje přes vlastnost `scale` (nemění layout) */
+.btn--yes {
+  min-width: 132px;
+  font-size: 1.2rem;
+  padding: 14px 30px;
+  transition:
+    scale 320ms var(--ease-out),
+    translate 320ms var(--ease-out),
+    box-shadow var(--dur-fast) ease,
+    filter var(--dur-fast) ease;
+}
+
+@media (hover: hover) {
+  .btn--yes:hover {
+    filter: brightness(1.06);
+    box-shadow: 0 16px 30px -10px rgba(184, 42, 98, 0.8);
+  }
+}
+
+.btn--yes:active {
+  filter: brightness(0.95);
+}
+
+.btn--no {
+  color: var(--c-primary-strong);
+  background: var(--c-surface);
+  border: 2px solid var(--c-border);
+  box-shadow: var(--shadow-soft);
+  min-width: 96px;
+  white-space: nowrap;
+  touch-action: none; /* žádné zoomování / posouvání při pokusu o tap */
+}
+
+/* NE po prvním úniku – visí přímo v <body>, pozice přes transform */
+.btn--no.is-escaping {
+  position: fixed;
+  top: 0;
+  left: 0;
+  z-index: 50;
+  margin: 0;
+  transition: transform 300ms var(--ease-out), opacity var(--dur-fast) ease;
+  will-change: transform;
+}
+
+/* Textový odkaz „← Zpět“ */
+.btn-link {
+  min-height: 44px;
+  padding: 10px 16px;
+  border: 0;
+  border-radius: var(--radius-sm);
+  background: transparent;
+  color: var(--c-text-muted);
+  font-weight: 600;
+  cursor: pointer;
+  transition: color var(--dur-fast) ease, background-color var(--dur-fast) ease;
+}
+
+.btn-link:hover {
+  color: var(--c-primary-strong);
+  background-color: var(--c-primary-soft);
+}
+
+.actions {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  margin-top: 6px;
+}
+
+.actions .btn--primary {
+  width: 100%;
+  max-width: 320px;
+}
+
+/* ---------- Formulářová pole ---------- */
+.fields {
+  display: grid;
+  gap: 14px;
+  width: 100%;
+}
+
+@media (min-width: 420px) {
+  .fields {
+    grid-template-columns: 1.3fr 1fr;
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+}
+
+.field__label {
+  padding-left: 4px;
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--c-text);
+}
+
+.field__input {
+  display: block;
+  width: 100%;
+  min-height: 56px;
+  padding: 14px 16px;
+  font-size: 1.1rem; /* ≥16px, aby iOS nezoomoval */
+  font-weight: 600;
+  background: var(--c-surface-soft);
+  border: 2px solid var(--c-border);
+  border-radius: var(--radius-md);
+  outline: none;
+  -webkit-appearance: none;
+  appearance: none;
+  transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease, background-color var(--dur-fast) ease;
+}
+
+/* iOS: prázdný date/time input jinak zkolabuje a text se nezarovná */
+.field__input[type="date"],
+.field__input[type="time"] {
+  line-height: 1.5;
+  text-align: left;
+  cursor: pointer;
+}
+
+.field__input::-webkit-date-and-time-value {
+  text-align: left;
+}
+
+.field__input::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  opacity: 0.7;
+}
+
+.field__input:hover {
+  border-color: #e9a9c4;
+}
+
+.field__input:focus-visible,
+.field__input:focus {
+  border-color: var(--c-primary);
+  background: var(--c-surface);
+  box-shadow: 0 0 0 4px rgba(210, 60, 119, 0.18);
+}
+
+.field__input--area {
+  min-height: 0;
+  padding: 12px 14px;
+  font-size: 1rem;
+  font-weight: 500;
+  line-height: 1.45;
+  resize: none;
+}
+
+.field-error,
+.send-error {
+  width: 100%;
+  margin: 0;
+  padding: 10px 14px;
+  border-radius: var(--radius-sm);
+  background: var(--c-danger-soft);
+  color: var(--c-danger);
+  font-weight: 600;
+  font-size: 0.95rem;
+  text-align: left;
+}
+
+/* ---------- Karty aktivit ---------- */
+.activity-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 10px;
+  width: 100%;
+}
+
+@media (min-width: 340px) {
+  .activity-grid {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+.activity {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  min-height: 84px;
+  padding: 10px 6px;
+  background: var(--c-surface-soft);
+  border: 2px solid var(--c-border);
+  border-radius: var(--radius-md);
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    box-shadow var(--dur-fast) ease;
+}
+
+.activity__emoji {
+  font-size: 1.9rem;
+  line-height: 1;
+}
+
+.activity__label {
+  font-weight: 700;
+  font-size: 0.9rem;
+  line-height: 1.2;
+}
+
+.activity__check {
+  position: absolute;
+  top: 6px;
+  right: 6px;
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: var(--c-primary);
+  color: var(--c-on-primary);
+  opacity: 0;
+  transform: scale(0.5);
+  transition: opacity var(--dur-fast) ease, transform var(--dur-fast) var(--ease-out);
+}
+
+.activity__check svg {
+  width: 14px;
+  height: 14px;
+}
+
+@media (hover: hover) {
+  .activity:hover {
+    border-color: #e9a9c4;
+    transform: translateY(-2px);
+  }
+}
+
+.activity:active {
+  transform: scale(0.97);
+}
+
+.activity[aria-pressed="true"] {
+  background: var(--c-primary-soft);
+  border-color: var(--c-primary);
+  box-shadow: 0 8px 18px -10px rgba(184, 42, 98, 0.6);
+}
+
+.activity[aria-pressed="true"] .activity__check {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* ---------- Shrnutí ---------- */
+.summary {
+  display: grid;
+  gap: 2px;
+  width: 100%;
+  margin: 0;
+  padding: 6px;
+  background: var(--c-surface-soft);
+  border: 2px solid var(--c-border);
+  border-radius: var(--radius-md);
+  text-align: left;
+}
+
+.summary__row {
+  display: grid;
+  grid-template-columns: 1.75rem 1fr;
+  column-gap: 8px;
+  padding: 10px 10px;
+  border-radius: var(--radius-sm);
+}
+
+.summary__row + .summary__row {
+  border-top: 1px dashed var(--c-border);
+  border-radius: 0;
+}
+
+.summary__icon {
+  grid-row: span 2;
+  font-size: 1.25rem;
+  line-height: 1.4;
+}
+
+.summary dt {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--c-text-muted);
+}
+
+.summary dd {
+  margin: 0;
+  font-weight: 600;
+  overflow-wrap: anywhere;
+  white-space: pre-line;
+}
+
+.summary dd.is-date::first-letter {
+  text-transform: uppercase;
+}
+
+/* ---------- Odeslat: loading stav ---------- */
+.spinner {
+  display: none;
+  width: 18px;
+  height: 18px;
+  border: 3px solid rgba(255, 255, 255, 0.45);
+  border-top-color: #ffffff;
+  border-radius: 50%;
+  animation: spin 800ms linear infinite;
+}
+
+.btn--send[aria-busy="true"] .spinner {
+  display: inline-block;
+}
+
+.btn--send[aria-busy="true"] {
+  cursor: progress;
+  opacity: 0.85;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+/* Honeypot – skrytý pro lidi */
+.honeypot {
+  display: none;
+}
+
+/* ---------- Děkovná obrazovka ---------- */
+.step--thanks {
+  padding: 8px 0 12px;
+}
+
+.step--thanks .title--script {
+  font-size: clamp(2.4rem, 11vw, 3rem);
+}
+
+.signature {
+  margin: -10px 0 0;
+  font-family: var(--font-script);
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: var(--c-primary-strong);
+}
+
+/* ---------- Plovoucí srdíčka na pozadí ---------- */
+.bg-hearts {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.bg-heart,
+.bg-sparkle {
+  position: absolute;
+  display: block;
+  color: var(--c);
+  will-change: transform, opacity;
+}
+
+.bg-heart {
+  bottom: -48px;
+  left: var(--x);
+  width: var(--size);
+  height: var(--size);
+  opacity: 0;
+  animation: float-up var(--dur) linear var(--delay) infinite;
+}
+
+.bg-sparkle {
+  top: var(--y);
+  left: var(--x);
+  width: var(--size);
+  height: var(--size);
+  opacity: 0;
+  animation: twinkle var(--dur) ease-in-out var(--delay) infinite;
+}
+
+.bg-heart svg,
+.bg-sparkle svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@keyframes float-up {
+  0%   { transform: translate3d(0, 0, 0) rotate(-8deg); opacity: 0; }
+  12%  { opacity: var(--o); }
+  85%  { opacity: var(--o); }
+  100% { transform: translate3d(var(--drift), -112vh, 0) rotate(14deg); opacity: 0; }
+}
+
+@keyframes twinkle {
+  0%, 100% { transform: scale(0.4); opacity: 0; }
+  50%      { transform: scale(1); opacity: var(--o); }
+}
+
+/* Konfety / srdíčka po kliknutí na ANO */
+.confetti-canvas {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+}
+
+/* Pomocný prvek pro safe-area insety (čte ho JS) */
+.safe-area-probe {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 0;
+  height: 0;
+  visibility: hidden;
+  pointer-events: none;
+  padding:
+    env(safe-area-inset-top, 0px)
+    env(safe-area-inset-right, 0px)
+    env(safe-area-inset-bottom, 0px)
+    env(safe-area-inset-left, 0px);
+}
+
+/* ---------- Nízké displeje (telefon na šířku) ---------- */
+@media (max-height: 560px) {
+  .card {
+    padding-top: 18px;
+    padding-bottom: 16px;
+  }
+
+  .step {
+    gap: 10px;
+  }
+
+  .photo {
+    width: 96px;
+  }
+
+  .polaroid {
+    padding: 6px 6px 16px;
+  }
+
+  .photo__fallback {
+    font-size: 2.8rem;
+  }
+
+  .choice-row {
+    min-height: 80px;
+  }
+}
+
+/* ---------- Omezený pohyb ---------- */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 1ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+  }
+
+  .step.is-active {
+    animation: fade-in 200ms ease both !important;
+  }
+
+  @keyframes fade-in {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  /* Srdíčka stojí na místě, jen jemně prosvítají */
+  .bg-heart {
+    bottom: auto;
+    top: var(--y);
+    animation: none !important;
+    opacity: calc(var(--o) * 0.7);
+  }
+
+  .bg-sparkle {
+    animation: none !important;
+    opacity: calc(var(--o) * 0.6);
+  }
+
+  .btn--no.is-escaping {
+    transition: transform 120ms ease, opacity 120ms ease;
+  }
+
+  .btn--yes {
+    transition: scale 150ms ease, translate 150ms ease;
+  }
+
+  .spinner {
+    animation: spin 800ms linear infinite !important;
+    animation-iteration-count: infinite !important;
+  }
+}

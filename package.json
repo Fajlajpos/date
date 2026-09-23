@@ -1,0 +1,15 @@
+{
+  "name": "rande",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Půjdeš se mnou na rande? – web + odesílání odpovědi přes Gmail",
+  "engines": {
+    "node": ">=20.12"
+  },
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "nodemailer": "^10.0.10"
+  }
+}

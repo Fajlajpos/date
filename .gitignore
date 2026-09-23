@@ -1,0 +1,9 @@
+# Zadání webu – nemusí být ve veřejném repu
+prompt.md
+node_modules/
+
+# Tajné údaje (heslo aplikace Gmail) – NIKDY do gitu
+.env
+.env.*
+!.env.example
+.vercel
