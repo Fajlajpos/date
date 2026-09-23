@@ -14,10 +14,12 @@
   --c-surface: #ffffff;
   --c-surface-soft: #fff5f9;
   --c-border: #f3cddd;
+  --c-border-hover: #e9a9c4;
 
   /* Text */
   --c-text: #4a1f3d;
   --c-text-muted: #7a4a68;
+  --c-text-faint: rgba(74, 31, 61, 0.3);
 
   /* Hlavní akcent (tlačítka) */
   --c-primary: #d23c77;
@@ -26,8 +28,6 @@
   --c-on-primary: #ffffff;
 
   /* Doplňkové */
-  --c-lavender: #b99cf2;
-  --c-peach: #ffb89a;
   --c-focus: #7a3cf0;
   --c-danger: #b0243f;
   --c-danger-soft: #fff0f3;
@@ -45,8 +45,8 @@
   --shadow-btn: 0 10px 22px -10px rgba(184, 42, 98, 0.7);
 
   /* Písma (vždy s fallbacky) */
-  --font-body: "Quicksand", "Nunito", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
-  --font-script: "Dancing Script", "Quicksand", system-ui, sans-serif;
+  --font-body: "Nunito", "Quicksand", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-display: "Playpen Sans", "Nunito", system-ui, -apple-system, "Segoe UI", sans-serif;
 
   /* Pohyb */
   --ease-out: cubic-bezier(0.22, 0.8, 0.3, 1);
@@ -158,18 +158,18 @@ textarea {
 /* ---------- Nadpisy ---------- */
 .title {
   margin: 0;
-  font-size: 1.6rem;
+  font-family: var(--font-display);
+  font-size: 1.45rem;
   font-weight: 700;
-  line-height: 1.25;
+  line-height: 1.3;
   color: var(--c-text);
   text-wrap: balance;
+  white-space: pre-line; /* \n v TEXTS = nový řádek */
 }
 
 .title--script {
-  font-family: var(--font-script);
-  font-weight: 700;
-  font-size: clamp(2rem, 8.6vw, 2.6rem);
-  line-height: 1.25;
+  font-size: clamp(1.6rem, 6.8vw, 2.1rem);
+  line-height: 1.3;
   color: var(--c-primary-strong);
 }
 
@@ -178,14 +178,21 @@ textarea {
   color: var(--c-text-muted);
 }
 
-/* ---------- Polaroid s fotkou (signature prvek) ---------- */
+/* ---------- Polaroid s fotkou ---------- */
 .polaroid {
   position: relative;
-  margin: 4px 0 6px;
-  padding: 10px 10px 30px;
-  background: var(--c-polaroid);
-  border-radius: 6px;
-  box-shadow: 0 14px 30px -14px rgba(74, 31, 61, 0.45), 0 2px 6px rgba(74, 31, 61, 0.08);
+  margin: 8px 0 4px;
+  padding: 11px 11px 0;
+  /* papír: světlo shora, lehce tmavší dole */
+  background: linear-gradient(170deg, #ffffff 0%, var(--c-polaroid) 45%, #f6f1ec 100%);
+  border-radius: 3px;
+  /* vrstvený stín – ostrý u papíru, měkký dál od něj → fotka „leží“ na kartě */
+  box-shadow:
+    0 0 0 1px rgba(74, 31, 61, 0.05),
+    0 1px 1px rgba(74, 31, 61, 0.08),
+    0 3px 6px rgba(74, 31, 61, 0.08),
+    0 10px 18px -6px rgba(74, 31, 61, 0.18),
+    0 24px 40px -16px rgba(74, 31, 61, 0.38);
   transform: rotate(-3deg);
 }
 
@@ -193,22 +200,40 @@ textarea {
 .polaroid::before {
   content: "";
   position: absolute;
-  top: -10px;
+  z-index: 2;
+  top: -12px;
   left: 50%;
-  width: 72px;
-  height: 22px;
-  background: var(--c-tape);
-  border-radius: 3px;
+  width: 84px;
+  height: 26px;
+  background:
+    linear-gradient(90deg, rgba(255, 255, 255, 0.25), rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.2) 70%, rgba(255, 255, 255, 0)),
+    var(--c-tape);
+  box-shadow: 0 1px 2px rgba(74, 31, 61, 0.15);
   transform: translateX(-50%) rotate(4deg);
+  /* zubaté konce jako u utržené pásky */
+  clip-path: polygon(0 6%, 3% 0, 6% 8%, 9% 0, 91% 0, 94% 8%, 97% 0, 100% 6%, 100% 94%, 97% 100%, 94% 92%, 91% 100%, 9% 100%, 6% 92%, 3% 100%, 0 94%);
 }
 
 .photo {
   position: relative;
-  width: clamp(128px, 40vw, 176px);
+  width: clamp(150px, 46vw, 200px);
   aspect-ratio: 1 / 1;
   overflow: hidden;
-  border-radius: 3px;
+  border-radius: 1px;
   background: linear-gradient(135deg, var(--c-primary-soft), var(--c-bg-2));
+}
+
+/* Fotka „zapuštěná“ do papíru: vnitřní stín na okrajích + jemný lesk */
+.photo::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: linear-gradient(135deg, rgba(255, 255, 255, 0.16) 0%, rgba(255, 255, 255, 0) 38%);
+  box-shadow:
+    inset 0 0 0 1px rgba(0, 0, 0, 0.12),
+    inset 0 2px 5px rgba(0, 0, 0, 0.28),
+    inset 0 0 22px rgba(0, 0, 0, 0.22);
 }
 
 .photo__img {
@@ -216,8 +241,23 @@ textarea {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center top;
   opacity: 0;
   transition: opacity var(--dur) ease;
+}
+
+/* Ručně psaný popisek v bílém pruhu polaroidu */
+.polaroid__caption {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 42px;
+  padding: 4px 6px 6px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--c-text-muted);
+  transform: rotate(-1deg);
 }
 
 .photo__fallback {
@@ -243,12 +283,24 @@ textarea {
 }
 
 .polaroid--small {
-  padding: 8px 8px 22px;
+  padding: 8px 8px 24px;
   transform: rotate(3deg);
 }
 
+.polaroid--small::before {
+  width: 64px;
+  height: 20px;
+  top: -10px;
+}
+
 .polaroid--small .photo {
-  width: clamp(104px, 30vw, 128px);
+  width: clamp(112px, 32vw, 136px);
+}
+
+/* Fotka na výšku (konec) – celá, bez ořezu */
+.polaroid--small .photo--portrait {
+  width: clamp(136px, 40vw, 168px);
+  aspect-ratio: 4 / 5;
 }
 
 .polaroid--small .photo__fallback {
@@ -262,7 +314,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--c-text-muted);
 }
 
@@ -286,7 +338,7 @@ textarea {
   padding: 12px 26px;
   border: 0;
   border-radius: 999px;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 1.1rem;
   line-height: 1.2;
   cursor: pointer;
@@ -302,7 +354,10 @@ textarea {
 
 .btn:focus-visible,
 .btn-link:focus-visible,
-.activity:focus-visible {
+.activity:focus-visible,
+.cal-nav:focus-visible,
+.cal-day:focus-visible,
+.time-chip:focus-visible {
   outline: 3px solid var(--c-focus);
   outline-offset: 3px;
 }
@@ -396,7 +451,7 @@ textarea {
   border-radius: var(--radius-sm);
   background: transparent;
   color: var(--c-text-muted);
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   transition: color var(--dur-fast) ease, background-color var(--dur-fast) ease;
 }
@@ -420,19 +475,251 @@ textarea {
   max-width: 320px;
 }
 
-/* ---------- Formulářová pole ---------- */
-.fields {
-  display: grid;
-  gap: 14px;
+/* ---------- Kalendář (krok 2) ---------- */
+.calendar {
   width: 100%;
+  padding: 10px 10px 12px;
+  background: var(--c-surface-soft);
+  border: 2px solid var(--c-border);
+  border-radius: var(--radius-md);
 }
 
-@media (min-width: 420px) {
-  .fields {
-    grid-template-columns: 1.3fr 1fr;
+.calendar__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 4px;
+}
+
+.calendar__month {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.2rem;
+  color: var(--c-primary-strong);
+}
+
+.calendar__month::first-letter {
+  text-transform: uppercase;
+}
+
+.cal-nav {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  padding: 0;
+  border: 2px solid var(--c-border);
+  border-radius: 50%;
+  background: var(--c-surface);
+  color: var(--c-primary-strong);
+  cursor: pointer;
+  transition: border-color var(--dur-fast) ease, background-color var(--dur-fast) ease, opacity var(--dur-fast) ease;
+}
+
+.cal-nav svg {
+  width: 20px;
+  height: 20px;
+}
+
+@media (hover: hover) {
+  .cal-nav:not(:disabled):hover {
+    border-color: var(--c-border-hover);
+    background: var(--c-primary-soft);
   }
 }
 
+.cal-nav:disabled {
+  opacity: 0.35;
+  cursor: default;
+}
+
+.calendar__weekdays,
+.calendar__grid {
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+}
+
+.calendar__weekdays {
+  margin-bottom: 2px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--c-text-muted);
+}
+
+.calendar__grid {
+  row-gap: 2px;
+}
+
+.calendar__grid.is-turning {
+  animation: cal-turn var(--dur) var(--ease-out);
+}
+
+.calendar__grid.is-turning[data-dir="prev"] {
+  animation-name: cal-turn-back;
+}
+
+@keyframes cal-turn {
+  from { opacity: 0; transform: translate3d(14px, 0, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+@keyframes cal-turn-back {
+  from { opacity: 0; transform: translate3d(-14px, 0, 0); }
+  to   { opacity: 1; transform: none; }
+}
+
+.cal-day {
+  position: relative;
+  display: grid;
+  place-items: center;
+  height: 42px;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  font-weight: 700;
+  font-size: 1rem;
+  font-variant-numeric: tabular-nums;
+  color: var(--c-text);
+  cursor: pointer;
+  touch-action: manipulation;
+}
+
+/* Kolečko pod číslem – hover a výběr */
+.cal-day::before {
+  content: "";
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: transparent;
+  transform: translate(-50%, -50%) scale(0.6);
+  transition:
+    background-color var(--dur-fast) ease,
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) ease;
+}
+
+.cal-day__num {
+  position: relative;
+}
+
+/* Dnešek – malá tečka pod číslem */
+.cal-day.is-today::after {
+  content: "";
+  position: absolute;
+  bottom: 3px;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--c-primary);
+  transform: translateX(-50%);
+}
+
+@media (hover: hover) {
+  .cal-day:not(:disabled):not([aria-pressed="true"]):hover::before {
+    background: var(--c-primary-soft);
+    transform: translate(-50%, -50%) scale(1);
+  }
+}
+
+.cal-day:disabled {
+  color: var(--c-text-faint);
+  font-weight: 500;
+  cursor: default;
+}
+
+.cal-day[aria-pressed="true"] {
+  color: var(--c-on-primary);
+}
+
+.cal-day[aria-pressed="true"]::before {
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-strong));
+  box-shadow: var(--shadow-soft);
+  transform: translate(-50%, -50%) scale(1);
+}
+
+.cal-day[aria-pressed="true"].is-today::after {
+  background: var(--c-on-primary);
+}
+
+/* ---------- Výběr času ---------- */
+.time-pick {
+  width: 100%;
+  text-align: left;
+}
+
+.time-pick__label {
+  margin: 0 0 6px;
+  padding-left: 4px;
+  font-weight: 800;
+  font-size: 0.95rem;
+}
+
+.time-pick__label::first-letter {
+  text-transform: uppercase;
+}
+
+/* Řada časů – posouvá se do strany (na mobilu prstem, na PC kolečkem) */
+.time-chips {
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  padding: 4px 4px 12px;
+  scroll-snap-type: x proximity;
+  scrollbar-width: thin;
+  scrollbar-color: var(--c-border) transparent;
+  -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+  mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
+}
+
+.time-chip {
+  flex: 0 0 auto;
+  min-width: 70px;
+  min-height: 44px;
+  padding: 0 16px;
+  scroll-snap-align: start;
+  border: 2px solid var(--c-border);
+  border-radius: 999px;
+  background: var(--c-surface);
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) ease,
+    background-color var(--dur-fast) ease,
+    border-color var(--dur-fast) ease,
+    color var(--dur-fast) ease;
+}
+
+@media (hover: hover) {
+  .time-chip:not(:disabled):not([aria-pressed="true"]):hover {
+    border-color: var(--c-border-hover);
+    transform: translateY(-2px);
+  }
+}
+
+.time-chip[aria-pressed="true"] {
+  color: var(--c-on-primary);
+  background: linear-gradient(135deg, var(--c-primary), var(--c-primary-strong));
+  border-color: transparent;
+  box-shadow: var(--shadow-soft);
+}
+
+.time-chip:disabled {
+  color: var(--c-text-faint);
+  text-decoration: line-through;
+  cursor: default;
+}
+
+/* ---------- Formulářová pole (krok 3) ---------- */
 .field {
   display: flex;
   flex-direction: column;
@@ -443,7 +730,7 @@ textarea {
 
 .field__label {
   padding-left: 4px;
-  font-weight: 700;
+  font-weight: 800;
   font-size: 0.95rem;
   color: var(--c-text);
 }
@@ -451,54 +738,28 @@ textarea {
 .field__input {
   display: block;
   width: 100%;
-  min-height: 56px;
-  padding: 14px 16px;
-  font-size: 1.1rem; /* ≥16px, aby iOS nezoomoval */
-  font-weight: 600;
+  padding: 12px 14px;
+  font-size: 1rem; /* ≥16px, aby iOS nezoomoval */
+  font-weight: 500;
+  line-height: 1.45;
   background: var(--c-surface-soft);
   border: 2px solid var(--c-border);
   border-radius: var(--radius-md);
   outline: none;
+  resize: none;
   -webkit-appearance: none;
   appearance: none;
   transition: border-color var(--dur-fast) ease, box-shadow var(--dur-fast) ease, background-color var(--dur-fast) ease;
 }
 
-/* iOS: prázdný date/time input jinak zkolabuje a text se nezarovná */
-.field__input[type="date"],
-.field__input[type="time"] {
-  line-height: 1.5;
-  text-align: left;
-  cursor: pointer;
-}
-
-.field__input::-webkit-date-and-time-value {
-  text-align: left;
-}
-
-.field__input::-webkit-calendar-picker-indicator {
-  cursor: pointer;
-  opacity: 0.7;
-}
-
 .field__input:hover {
-  border-color: #e9a9c4;
+  border-color: var(--c-border-hover);
 }
 
-.field__input:focus-visible,
 .field__input:focus {
   border-color: var(--c-primary);
   background: var(--c-surface);
   box-shadow: 0 0 0 4px rgba(210, 60, 119, 0.18);
-}
-
-.field__input--area {
-  min-height: 0;
-  padding: 12px 14px;
-  font-size: 1rem;
-  font-weight: 500;
-  line-height: 1.45;
-  resize: none;
 }
 
 .field-error,
@@ -509,7 +770,7 @@ textarea {
   border-radius: var(--radius-sm);
   background: var(--c-danger-soft);
   color: var(--c-danger);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.95rem;
   text-align: left;
 }
@@ -555,7 +816,7 @@ textarea {
 }
 
 .activity__label {
-  font-weight: 700;
+  font-weight: 800;
   font-size: 0.9rem;
   line-height: 1.2;
 }
@@ -583,7 +844,7 @@ textarea {
 
 @media (hover: hover) {
   .activity:hover {
-    border-color: #e9a9c4;
+    border-color: var(--c-border-hover);
     transform: translateY(-2px);
   }
 }
@@ -637,13 +898,13 @@ textarea {
 
 .summary dt {
   font-size: 0.85rem;
-  font-weight: 700;
+  font-weight: 800;
   color: var(--c-text-muted);
 }
 
 .summary dd {
   margin: 0;
-  font-weight: 600;
+  font-weight: 700;
   overflow-wrap: anywhere;
   white-space: pre-line;
 }
@@ -687,14 +948,14 @@ textarea {
 }
 
 .step--thanks .title--script {
-  font-size: clamp(2.4rem, 11vw, 3rem);
+  font-size: clamp(2.1rem, 9vw, 2.6rem);
 }
 
 .signature {
-  margin: -10px 0 0;
-  font-family: var(--font-script);
+  margin: -8px 0 0;
+  font-family: var(--font-display);
   font-weight: 700;
-  font-size: 1.5rem;
+  font-size: 1.2rem;
   color: var(--c-primary-strong);
 }
 
@@ -778,7 +1039,40 @@ textarea {
     env(safe-area-inset-left, 0px);
 }
 
-/* ---------- Nízké displeje (telefon na šířku) ---------- */
+/* ---------- Úzké a nízké displeje ---------- */
+@media (max-width: 359px) {
+  .card {
+    padding-left: 14px;
+    padding-right: 14px;
+  }
+
+  .calendar {
+    padding-left: 4px;
+    padding-right: 4px;
+  }
+
+  .cal-day::before {
+    width: 34px;
+    height: 34px;
+  }
+}
+
+@media (max-height: 620px) {
+  .cal-day {
+    height: 36px;
+  }
+
+  .cal-day::before {
+    width: 32px;
+    height: 32px;
+  }
+
+  .cal-nav {
+    width: 40px;
+    height: 40px;
+  }
+}
+
 @media (max-height: 560px) {
   .card {
     padding-top: 18px;
@@ -794,7 +1088,12 @@ textarea {
   }
 
   .polaroid {
-    padding: 6px 6px 16px;
+    padding: 6px 6px 0;
+  }
+
+  .polaroid__caption {
+    min-height: 26px;
+    font-size: 0.8rem;
   }
 
   .photo__fallback {

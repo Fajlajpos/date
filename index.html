@@ -18,7 +18,7 @@
   <!-- Písma z Google Fonts (s font-display: swap) -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@700&family=Quicksand:wght@500;600;700&display=swap">
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&family=Playpen+Sans:wght@700&display=swap">
 
   <link rel="stylesheet" href="./style.css">
 </head>
@@ -35,9 +35,10 @@
     <section class="step is-active" data-step="1" aria-labelledby="question">
       <figure class="polaroid">
         <div class="photo" data-photo>
-          <img class="photo__img" alt="" data-text-alt="photoAlt" width="600" height="600" decoding="async">
+          <img class="photo__img" alt="" data-text-alt="photoAlt" width="800" height="800" decoding="async" fetchpriority="high">
           <span class="photo__fallback" role="img" aria-label="Zamilovaný smajlík">🥰</span>
         </div>
+        <figcaption class="polaroid__caption" data-text="photoCaption">my dva 🤍</figcaption>
       </figure>
 
       <h1 class="title title--script" id="question" tabindex="-1" data-text="question">Půjdeš se mnou na rande? 🥺</h1>
@@ -53,18 +54,30 @@
     <!-- ============ KROK 2: Datum a čas ============ -->
     <section class="step" data-step="2" aria-labelledby="step2-title" hidden>
       <h2 class="title" id="step2-title" tabindex="-1" data-text="step2Title">Yay! 🎉 Tak kdy?</h2>
-      <p class="subtitle" data-text="step2Subtitle">Vyber den a čas, který se ti hodí.</p>
 
-      <div class="fields">
-        <div class="field">
-          <label class="field__label" for="date-input" data-text="dateLabel">Datum</label>
-          <input class="field__input" type="date" id="date-input" required>
+      <!-- Vlastní kalendář (žádný systémový výběr data) – dny generuje script.js -->
+      <div class="calendar">
+        <div class="calendar__head">
+          <button type="button" class="cal-nav" id="cal-prev" aria-label="Předchozí měsíc">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m15 18-6-6 6-6"/></svg>
+          </button>
+          <p class="calendar__month" id="cal-month" aria-live="polite"></p>
+          <button type="button" class="cal-nav" id="cal-next" aria-label="Další měsíc">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
         </div>
-        <div class="field">
-          <label class="field__label" for="time-input" data-text="timeLabel">Čas</label>
-          <input class="field__input" type="time" id="time-input" step="300" required>
+        <div class="calendar__weekdays" aria-hidden="true">
+          <span>po</span><span>út</span><span>st</span><span>čt</span><span>pá</span><span>so</span><span>ne</span>
         </div>
+        <div class="calendar__grid" id="cal-grid" role="group" aria-labelledby="cal-month"></div>
       </div>
+
+      <!-- Výběr času – kartičky s časy (generuje script.js) -->
+      <div class="time-pick">
+        <p class="time-pick__label" id="time-label" data-text="timeLabel">V kolik?</p>
+        <div class="time-chips" id="time-chips" role="group" aria-labelledby="time-label"></div>
+      </div>
+
       <p class="field-error" id="datetime-error" role="alert" hidden></p>
 
       <div class="actions">
@@ -119,8 +132,8 @@
     <!-- ============ KROK 5: Děkovná obrazovka ============ -->
     <section class="step step--thanks" data-step="5" aria-labelledby="thanks-title" hidden>
       <figure class="polaroid polaroid--small">
-        <div class="photo" data-photo>
-          <img class="photo__img" alt="" data-text-alt="photoAlt" width="600" height="600" decoding="async">
+        <div class="photo photo--portrait" data-photo="end">
+          <img class="photo__img" alt="" data-text-alt="photoAlt" width="640" height="800" decoding="async">
           <span class="photo__fallback" role="img" aria-label="Zamilovaný smajlík">🥰</span>
         </div>
       </figure>

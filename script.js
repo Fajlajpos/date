@@ -7,14 +7,15 @@
 
 /* ---------- 1) ÚDAJE K DOPLNĚNÍ ---------- */
 const CONFIG = {
-  herName: "[JMÉNO HOLKY]",                    // 1. pád – „Eliška“ (do emailu: „Eliška řekla ANO“)
-  herNameVocative: "",                         // 5. pád – „Eliško“ (oslovení v otázce). Prázdné = použije se herName
-  myName: "[MOJE JMÉNO]",
+  herName: "Klára",                            // 1. pád – do e-mailu („Klára řekla ANO“)
+  herNameVocative: "Klári",                    // oslovení v otázce („Klári, půjdeš…“)
+  myName: "Filip",
   apiUrl: "api/send",                          // vlastní server (server.js lokálně / Vercel) – posílá přes Gmail, heslo je v .env
   googleScriptUrl: "",                         // alternativa: URL z Google Apps Script (…/exec) – použije se, když apiUrl je prázdné
   myEmail: "",                                 // alternativa přes FormSubmit.co (e-mail by byl vidět v kódu)
   web3formsKey: "",                            // alternativa přes Web3Forms
-  photoPath: "assets/photo.jpg"
+  photoPath: "assets/photo.jpg",               // fotka na začátku (čtverec)
+  photoEndPath: "assets/photo-end.jpg"         // fotka na úplném konci (na výšku 4:5)
 };
 
 /* ---------- 2) TEXTY NA STRÁNCE ----------
@@ -23,33 +24,34 @@ const CONFIG = {
    {ja}     = CONFIG.myName                                  */
 const TEXTS = {
   question: "{jmeno5}, půjdeš se mnou na rande? 🥺",
-  tauntStart: "Vyber si moudře 😇",
+  tauntStart: "Nápověda: správná odpověď je ta růžová 😇",
   yesButton: "ANO 💖",
   noButton: "NE",
-  photoAlt: "Fotka pro tebe 💕",
+  photoAlt: "Naše fotka 💕",
+  photoCaption: "DO BAGAA 🤍",                     // ručně psaný popisek pod fotkou
 
-  step2Title: "Yay! 🎉 Tak kdy?",
-  step2Subtitle: "Vyber den a čas, který se ti hodí.",
-  dateLabel: "Datum",
-  timeLabel: "Čas",
-  datePast: "Tohle datum už bylo 🙈 Vyber prosím dnešek nebo později.",
-  timePast: "Tenhle čas už dneska proběhl ⏰ Zkus pozdější.",
+  step2Title: "Věděl jsem to! 🎉\nTak kdy?",        // \n = nový řádek
+  timeLabel: "Nejdřív den, pak čas ⏰",
+  timeLabelWithDate: "{datum} – v kolik?",
+  datePast: "Do minulosti zatím cestovat neumím 🕰️ Vyber jiný den.",
+  timePast: "Tenhle čas už utekl ⏰ (skoro tak rychle jako tlačítko NE)",
 
   step3Title: "Na co máš chuť? 😋",
-  step3Subtitle: "Klidně vyber víc možností.",
-  otherIdeaLabel: "Nebo mě napadá něco jiného… (nepovinné)",
-  messageLabel: "Vzkaz pro mě 💌 (nepovinné)",
+  step3Subtitle: "Klikni na něco, nebo mi to prostě napiš 👇",
+  otherIdeaLabel: "Nebo napiš, co by se ti líbilo ✍️",
+  otherIdeaPlaceholder: "Třeba bowling, zmrzlina, výlet na kolech…",
+  messageLabel: "Vzkaz pro mě 💌 (nepovinné, ale potěší)",
 
-  step4Title: "Tak to shrneme 📝",
+  step4Title: "Takže je to domluvené 📝",
   sendButton: "Odeslat 💌",
-  sending: "Odesílám…",
+  sending: "Posílám poštovního holuba… 🕊️",
   retryButton: "Zkusit znovu 💌",
-  sendError: "Něco se pokazilo, zkus to prosím znovu 🥺",
+  sendError: "Holub se cestou ztratil 🥺 Zkus to prosím znovu.",
   missingKey: "Chybí adresa pro odeslání 🔑 Doplň CONFIG.apiUrl ve script.js.",
 
   thanksTitle: "Těším se! 💕",
-  thanksSubtitle: "Odpověď už letí za mnou 💌",
-  thanksSignature: "— {ja}",
+  thanksSubtitle: "Odpověď už letí za mnou. Teď už nemůžeš couvnout 😌",
+  thanksSignature: "FILIP (TRUBKA)",
 
   continue: "Pokračovat →",
   back: "← Zpět",
@@ -59,17 +61,20 @@ const TEXTS = {
   emailFromName: "Rande web 💕"
 };
 
-/* ---------- 3) HLÁŠKY PO ÚTĚKU TLAČÍTKA NE ---------- */
+/* ---------- 3) HLÁŠKY PO ÚTĚKU TLAČÍTKA NE ----------
+   {pokusy} = kolikrát už to zkusila                         */
 const TAUNTS = [
   "Ale no tak… 🥺",
-  "Zkus to ještě jednou 😏",
-  "Tlačítko NE je dnes na dovolené 🏝️",
-  "Vážně? 💔",
-  "Tak to už je trochu podezřelé 👀",
-  "Ono to fakt nejde, co? 😇",
-  "ANO je přece hned vedle 💖",
-  "Tohle tlačítko je jen na ozdobu ✨",
-  "Já ti dám NE! 😤",
+  "Tohle tlačítko je jen na ozdobu 💅",
+  "Chyba systému: odpověď NE nenalezena 🤖",
+  "Tlačítko NE si vzalo dovolenou 🏝️",
+  "Skóre: tlačítko {pokusy}, {jmeno5} 0 😎",
+  "Máma říkala, že NE není odpověď 🙅",
+  "Trénovalo na olympiádu, nemáš šanci 🏃",
+  "Každý pokus vidím, jen aby bylo jasno 👀",
+  "ANO je větší, protože je lepší 💖",
+  "Programoval jsem to dvě hodiny, tak ať to stojí za to 😤",
+  "Už {pokusy} pokusů… obdivuju tu vytrvalost 😅",
   "Pořád čekám na správnou odpověď 🥰"
 ];
 
@@ -77,11 +82,18 @@ const TAUNTS = [
 const ACTIVITIES = [
   { id: "kino",       emoji: "🎬", label: "Kino" },
   { id: "fastfood",   emoji: "🍔", label: "Fast food" },
-  { id: "sushi",      emoji: "🍣", label: "Sushi" },
-  { id: "prochazka",  emoji: "🌸", label: "Jít ven / procházka" },
+  { id: "netflix",    emoji: "📺", label: "Netflix" },
+  { id: "prochazka",  emoji: "🌸", label: "Procházka" },
   { id: "projizdka",  emoji: "🚗", label: "Projížďka autem" },
-  { id: "pizza",      emoji: "🍕", label: "Pizza" }
+  { id: "testoviny",  emoji: "🍝", label: "Těstoviny" }
 ];
+
+/* ---------- 5) ČASY A KALENDÁŘ (krok 2) ---------- */
+const TIME_FROM = "10:00";      // první nabízený čas
+const TIME_TO = "22:00";        // poslední nabízený čas
+const TIME_STEP = 30;           // po kolika minutách
+const TIME_PREFERRED = "17:00"; // na tenhle čas se řada časů na začátku posune
+const MONTHS_AHEAD = 12;        // kolik měsíců dopředu jde v kalendáři listovat
 
 /* ---------- Konstanty chování ---------- */
 const WEB3FORMS_URL = "https://api.web3forms.com/submit";
@@ -126,7 +138,9 @@ function fill(text) {
   return String(text)
     .replaceAll("{jmeno5}", vocative)
     .replaceAll("{jmeno}", CONFIG.herName)
-    .replaceAll("{ja}", CONFIG.myName);
+    .replaceAll("{ja}", CONFIG.myName)
+    // nezlomitelná mezera před emoji, ať nikdy nezůstane samo na řádku
+    .replace(/ ([\p{Extended_Pictographic}️‍]+)/gu, " $1");
 }
 
 /* =========================================================
@@ -189,7 +203,7 @@ function setupPhotos() {
       frame.classList.remove("has-photo");
       frame.classList.add("no-photo");
     });
-    img.src = CONFIG.photoPath;
+    img.src = frame.dataset.photo === "end" ? CONFIG.photoEndPath : CONFIG.photoPath;
   });
 }
 
@@ -215,6 +229,7 @@ function goTo(step) {
     if (noEscaped) requestAnimationFrame(() => placeNo({ animate: false }));
   }
 
+  if (step === 2) onEnterStep2();
   if (step === 4) renderSummary();
 
   window.scrollTo(0, 0);
@@ -493,7 +508,7 @@ function overlapsForbidden(rect) {
 
 function showNextTaunt() {
   tauntIndex = (tauntIndex + 1) % TAUNTS.length;
-  tauntEl.textContent = TAUNTS[tauntIndex];
+  tauntEl.textContent = fill(TAUNTS[tauntIndex]).replaceAll("{pokusy}", state.noAttempts);
   tauntEl.classList.remove("is-new");
   void tauntEl.offsetWidth;
   tauntEl.classList.add("is-new");
@@ -626,49 +641,251 @@ function drawHeart(ctx, s) {
 /* =========================================================
    KROK 2 – datum a čas
    ========================================================= */
-const dateInput = $("#date-input");
-const timeInput = $("#time-input");
+const calGrid = $("#cal-grid");
+const calMonth = $("#cal-month");
+const calPrev = $("#cal-prev");
+const calNext = $("#cal-next");
+const timeLabel = $("#time-label");
+const timeChips = $("#time-chips");
 const dateTimeError = $("#datetime-error");
 const toStep3Btn = $("#to-step-3");
 
-/** Dnešní datum ve formátu YYYY-MM-DD (místní čas, ne UTC). */
-function todayISO() {
-  const d = new Date();
-  return `${d.getFullYear()}-${pad2(d.getMonth() + 1)}-${pad2(d.getDate())}`;
+/** Zobrazený měsíc v kalendáři { y, m } (m = 0–11). */
+let calView = null;
+
+function pad2(n) { return String(n).padStart(2, "0"); }
+
+/** YYYY-MM-DD v místním čase (ne UTC). */
+function toISO(date) {
+  return `${date.getFullYear()}-${pad2(date.getMonth() + 1)}-${pad2(date.getDate())}`;
 }
+function todayISO() { return toISO(new Date()); }
 function nowHHMM() {
   const d = new Date();
   return `${pad2(d.getHours())}:${pad2(d.getMinutes())}`;
 }
-function pad2(n) { return String(n).padStart(2, "0"); }
+
+/** Všechny nabízené časy podle TIME_FROM / TIME_TO / TIME_STEP. */
+function buildTimeSlots() {
+  const toMin = (t) => { const [h, m] = t.split(":").map(Number); return h * 60 + m; };
+  const slots = [];
+  for (let t = toMin(TIME_FROM); t <= toMin(TIME_TO); t += TIME_STEP) {
+    slots.push(`${pad2(Math.floor(t / 60))}:${pad2(t % 60)}`);
+  }
+  return slots;
+}
+const TIME_SLOTS = buildTimeSlots();
+
+/** Dneska už nejde vybrat žádný čas (je moc pozdě)? */
+function isTodayTooLate() {
+  return nowHHMM() >= TIME_SLOTS[TIME_SLOTS.length - 1];
+}
+
+/** O kolik měsíců je {y, m} dál než aktuální měsíc. */
+function monthOffset(y, m) {
+  const now = new Date();
+  return (y - now.getFullYear()) * 12 + (m - now.getMonth());
+}
 
 function setupStep2() {
-  dateInput.min = todayISO();
-  ["input", "change", "blur"].forEach((type) => {
-    dateInput.addEventListener(type, validateDateTime);
-    timeInput.addEventListener(type, validateDateTime);
+  const now = new Date();
+  calView = { y: now.getFullYear(), m: now.getMonth() };
+
+  calPrev.addEventListener("click", () => shiftMonth(-1));
+  calNext.addEventListener("click", () => shiftMonth(1));
+  calGrid.addEventListener("click", (e) => {
+    const day = e.target.closest(".cal-day");
+    if (day && !day.disabled) selectDate(day.dataset.date);
   });
+  calGrid.addEventListener("keydown", onCalendarKey);
+
+  // Časy
+  TIME_SLOTS.forEach((time) => {
+    const chip = document.createElement("button");
+    chip.type = "button";
+    chip.className = "time-chip";
+    chip.dataset.time = time;
+    chip.textContent = time;
+    chip.setAttribute("aria-pressed", "false");
+    timeChips.appendChild(chip);
+  });
+  timeChips.addEventListener("click", (e) => {
+    const chip = e.target.closest(".time-chip");
+    if (!chip || chip.disabled) return;
+    state.time = chip.dataset.time;
+    updateTimeChips();
+    validateDateTime();
+  });
+  // Na počítači: kolečko myši posouvá řadu časů do strany
+  timeChips.addEventListener("wheel", (e) => {
+    const canScroll = timeChips.scrollWidth > timeChips.clientWidth;
+    if (canScroll && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+      timeChips.scrollLeft += e.deltaY;
+      e.preventDefault();
+    }
+  }, { passive: false });
+
   toStep3Btn.addEventListener("click", () => {
     if (validateDateTime()) goTo(3);
   });
+
+  renderCalendar();
+  updateTimeChips();
 }
 
-/** iOS Safari ignoruje `min`, proto kontrolujeme i v JS. */
-function validateDateTime() {
-  state.date = dateInput.value;
-  state.time = timeInput.value;
+/** Volá se při každém vstupu do kroku 2 (mohla mezitím uběhnout půlnoc). */
+function onEnterStep2() {
+  renderCalendar();
+  updateTimeChips();
+  validateDateTime();
+  // Řada časů je při skrytém kroku 0 px široká – posuň ji až teď
+  requestAnimationFrame(() => {
+    const target =
+      timeChips.querySelector('.time-chip[aria-pressed="true"]') ||
+      timeChips.querySelector(`.time-chip[data-time="${TIME_PREFERRED}"]:not(:disabled)`) ||
+      timeChips.querySelector(".time-chip:not(:disabled)");
+    if (target) timeChips.scrollLeft = target.offsetLeft - timeChips.offsetLeft - 12;
+  });
+}
 
+function shiftMonth(delta) {
+  const next = new Date(calView.y, calView.m + delta, 1);
+  const offset = monthOffset(next.getFullYear(), next.getMonth());
+  if (offset < 0 || offset >= MONTHS_AHEAD) return;
+  calView = { y: next.getFullYear(), m: next.getMonth() };
+  calGrid.dataset.dir = delta > 0 ? "next" : "prev";
+  renderCalendar();
+}
+
+/** Vykreslí dny zobrazeného měsíce. */
+function renderCalendar(focusISO = "") {
+  const { y, m } = calView;
+  const first = new Date(y, m, 1);
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const lead = (first.getDay() + 6) % 7; // týden začíná pondělím
+  const today = todayISO();
+  const todayClosed = isTodayTooLate();
+
+  calMonth.textContent = first.toLocaleDateString("cs-CZ", { month: "long", year: "numeric" });
+
+  const frag = document.createDocumentFragment();
+  for (let i = 0; i < lead; i++) {
+    const empty = document.createElement("span");
+    empty.className = "cal-empty";
+    frag.appendChild(empty);
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const date = new Date(y, m, d);
+    const iso = toISO(date);
+    const btn = document.createElement("button");
+    btn.type = "button";
+    btn.className = "cal-day";
+    btn.dataset.date = iso;
+    btn.tabIndex = -1;
+    btn.setAttribute("aria-label", date.toLocaleDateString("cs-CZ", { weekday: "long", day: "numeric", month: "long" }));
+    btn.innerHTML = `<span class="cal-day__num">${d}</span>`;
+
+    if (iso < today || (iso === today && todayClosed)) btn.disabled = true;
+    if (iso === today) {
+      btn.classList.add("is-today");
+      btn.setAttribute("aria-current", "date");
+    }
+    if ((date.getDay() + 6) % 7 >= 5) btn.classList.add("is-weekend");
+
+    btn.setAttribute("aria-pressed", String(iso === state.date));
+    frag.appendChild(btn);
+  }
+
+  calGrid.replaceChildren(frag);
+  calGrid.classList.remove("is-turning");
+  void calGrid.offsetWidth; // restart animace listování
+  calGrid.classList.add("is-turning");
+
+  // Roving tabindex: Tabem se jde jen na jeden den, šipkami po ostatních
+  const tabTarget =
+    (focusISO && calGrid.querySelector(`.cal-day[data-date="${focusISO}"]:not(:disabled)`)) ||
+    calGrid.querySelector('.cal-day[aria-pressed="true"]') ||
+    calGrid.querySelector(".cal-day.is-today:not(:disabled)") ||
+    calGrid.querySelector(".cal-day:not(:disabled)");
+  if (tabTarget) {
+    tabTarget.tabIndex = 0;
+    if (focusISO) tabTarget.focus();
+  }
+
+  calPrev.disabled = monthOffset(y, m) <= 0;
+  calNext.disabled = monthOffset(y, m) >= MONTHS_AHEAD - 1;
+}
+
+function selectDate(iso) {
+  state.date = iso;
+  $$(".cal-day", calGrid).forEach((btn) => {
+    const selected = btn.dataset.date === iso;
+    btn.setAttribute("aria-pressed", String(selected));
+    btn.tabIndex = selected ? 0 : -1;
+  });
+  updateTimeChips();
+  validateDateTime();
+}
+
+/** Šipky / Home / End v kalendáři. */
+function onCalendarKey(e) {
+  const day = e.target.closest(".cal-day");
+  if (!day) return;
+  const moves = { ArrowLeft: -1, ArrowRight: 1, ArrowUp: -7, ArrowDown: 7 };
+  const [y, m, d] = day.dataset.date.split("-").map(Number);
+  let target;
+  if (e.key in moves) target = new Date(y, m - 1, d + moves[e.key]);
+  else if (e.key === "Home") target = new Date(y, m - 1, d - ((new Date(y, m - 1, d).getDay() + 6) % 7));
+  else if (e.key === "End") target = new Date(y, m - 1, d + (6 - ((new Date(y, m - 1, d).getDay() + 6) % 7)));
+  else return;
+  e.preventDefault();
+
+  const iso = toISO(target);
+  const offset = monthOffset(target.getFullYear(), target.getMonth());
+  if (iso < todayISO() || offset >= MONTHS_AHEAD) return;
+
+  if (target.getMonth() !== calView.m || target.getFullYear() !== calView.y) {
+    calGrid.dataset.dir = target > new Date(y, m - 1, d) ? "next" : "prev";
+    calView = { y: target.getFullYear(), m: target.getMonth() };
+    renderCalendar(iso);
+    return;
+  }
+  const next = calGrid.querySelector(`.cal-day[data-date="${iso}"]`);
+  if (!next || next.disabled) return;
+  $$(".cal-day", calGrid).forEach((btn) => { btn.tabIndex = -1; });
+  next.tabIndex = 0;
+  next.focus();
+}
+
+/** Zakáže časy, které dneska už proběhly, a označí vybraný. */
+function updateTimeChips() {
+  const isToday = state.date === todayISO();
+  const now = nowHHMM();
+  $$(".time-chip", timeChips).forEach((chip) => {
+    const past = isToday && chip.dataset.time <= now;
+    chip.disabled = past;
+    if (past && state.time === chip.dataset.time) state.time = "";
+  });
+  $$(".time-chip", timeChips).forEach((chip) => {
+    chip.setAttribute("aria-pressed", String(chip.dataset.time === state.time));
+  });
+  timeLabel.textContent = state.date
+    ? TEXTS.timeLabelWithDate.replace("{datum}", formatDateCz(state.date))
+    : TEXTS.timeLabel;
+}
+
+/** Kontrola před pokračováním (např. když stránka zůstala otevřená přes noc). */
+function validateDateTime() {
   let error = "";
   if (state.date && state.date < todayISO()) {
     error = TEXTS.datePast;
-  } else if (state.date === todayISO() && state.time && state.time < nowHHMM()) {
+  } else if (state.date === todayISO() && state.time && state.time <= nowHHMM()) {
     error = TEXTS.timePast;
   }
 
   dateTimeError.textContent = error;
   dateTimeError.hidden = !error;
-  dateInput.setAttribute("aria-invalid", String(Boolean(error) && error === TEXTS.datePast));
-  timeInput.setAttribute("aria-invalid", String(Boolean(error) && error === TEXTS.timePast));
 
   const ok = Boolean(state.date && state.time && !error);
   toStep3Btn.disabled = !ok;
@@ -715,17 +932,30 @@ function setupStep3() {
       if (state.activities.has(act.id)) state.activities.delete(act.id);
       else state.activities.add(act.id);
       card.setAttribute("aria-pressed", String(state.activities.has(act.id)));
-      toStep4Btn.disabled = state.activities.size === 0;
+      updateStep3Button();
     });
     activityGrid.appendChild(card);
   });
 
-  otherIdeaInput.addEventListener("input", () => { state.otherIdea = otherIdeaInput.value; });
+  otherIdeaInput.placeholder = TEXTS.otherIdeaPlaceholder;
+  otherIdeaInput.addEventListener("input", () => {
+    state.otherIdea = otherIdeaInput.value;
+    updateStep3Button();
+  });
   messageInput.addEventListener("input", () => { state.message = messageInput.value; });
 
   toStep4Btn.addEventListener("click", () => {
-    if (state.activities.size > 0) goTo(4);
+    if (hasActivityChoice()) goTo(4);
   });
+}
+
+/** Stačí vybrat kartu, NEBO napsat vlastní nápad. */
+function hasActivityChoice() {
+  return state.activities.size > 0 || state.otherIdea.trim().length > 0;
+}
+
+function updateStep3Button() {
+  toStep4Btn.disabled = !hasActivityChoice();
 }
 
 function selectedActivityLabels() {
@@ -746,8 +976,8 @@ function renderSummary() {
   const rows = [
     { icon: "📅", label: "Datum", value: formatDateCz(state.date), cls: "is-date" },
     { icon: "🕖", label: "Čas", value: state.time },
-    { icon: "💗", label: "Chce", value: selectedActivityLabels().join(", ") },
-    { icon: "✍️", label: "Jiný nápad", value: state.otherIdea.trim() },
+    { icon: "💗", label: "Program", value: selectedActivityLabels().join(", ") },
+    { icon: "✍️", label: "Tvůj nápad", value: state.otherIdea.trim() },
     { icon: "💌", label: "Vzkaz", value: state.message.trim() }
   ].filter((row) => row.value);
 
@@ -775,7 +1005,7 @@ function buildFields() {
     ["📅 Datum", formatDateCz(state.date)],
     ["🕖 Čas", state.time],
     ["💗 Chce", selectedActivityLabels().join(", ")],
-    ["✍️ Jiný nápad", state.otherIdea.trim()],
+    ["✍️ Její nápad", state.otherIdea.trim()],
     ["💌 Vzkaz", state.message.trim()],
     ["😏 Pokusů kliknout na NE", String(state.noAttempts)],
     ["🕐 Odpověděla", new Date().toLocaleString("cs-CZ")]

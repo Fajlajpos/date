@@ -7,3 +7,7 @@ node_modules/
 .env.*
 !.env.example
 .vercel
+
+# Originál fotky (web používá zmenšenou assets/photo.jpg)
+39AC73E0-236C-4163-B70D-8BEE25B59EBC.jpg
+CBE5A494-CD00-4914-B623-2901B82C91D9.jpg
