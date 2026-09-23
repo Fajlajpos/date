@@ -10,9 +10,9 @@ const CONFIG = {
   herName: "Klára",                            // 1. pád – do e-mailu („Klára řekla ANO“)
   herNameVocative: "Klári",                    // oslovení v otázce („Klári, půjdeš…“)
   myName: "Filip",
-  apiUrl: "api/send",                          // vlastní server (server.js lokálně / Vercel) – posílá přes Gmail, heslo je v .env
-  googleScriptUrl: "",                         // alternativa: URL z Google Apps Script (…/exec) – použije se, když apiUrl je prázdné
-  myEmail: "",                                 // alternativa přes FormSubmit.co (e-mail by byl vidět v kódu)
+  myEmail: "filipmayer7@gmail.com",            // sem přijde odpověď – přes FormSubmit.co, funguje na GitHub Pages
+  apiUrl: "",                                  // alternativa: vlastní server (api/send.js + .env) – NEfunguje na GitHub Pages
+  googleScriptUrl: "",                         // alternativa: URL z Google Apps Script (…/exec)
   web3formsKey: "",                            // alternativa přes Web3Forms
   photoPath: "assets/photo.jpg",               // fotka na začátku (čtverec)
   photoEndPath: "assets/photo-end.jpg"         // fotka na úplném konci (na výšku 4:5)
