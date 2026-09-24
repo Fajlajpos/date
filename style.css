@@ -36,6 +36,12 @@
   --c-polaroid: #fffdfb;
   --c-tape: rgba(185, 156, 242, 0.55);
 
+  /* Obálka (úvod) */
+  --c-env-paper: #fffaf6;
+  --c-env-paper-2: #f7ece8;
+  --c-env-side: #efdfdb;
+  --c-env-liner: #f2a2c1;
+
   /* Tvary a stíny */
   --radius-lg: 24px;
   --radius-md: 18px;
@@ -104,9 +110,316 @@ textarea {
   display: none !important;
 }
 
+/* Text jen pro čtečky obrazovky */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
 /* Nadpisy dostávají programový focus při přechodu kroků – bez rámečku */
 [tabindex="-1"]:focus {
   outline: none;
+}
+
+/* ---------- Úvod: zalepená obálka ---------- */
+.intro-open .card {
+  display: none;
+}
+
+/* Úvod leží přes celou obrazovku, takže karta se pod ním může rozložit na své místo */
+.intro {
+  position: fixed;
+  inset: 0;
+  z-index: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 26px;
+  padding:
+    max(16px, env(safe-area-inset-top))
+    max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom))
+    max(16px, env(safe-area-inset-left));
+  text-align: center;
+}
+
+.intro__to,
+.intro__hint {
+  margin: 0;
+  transition: opacity var(--dur) ease, transform var(--dur) var(--ease-out);
+}
+
+.intro__to {
+  max-width: 480px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: clamp(1.5rem, 6.5vw, 2rem);
+  line-height: 1.3;
+  color: var(--c-primary-strong);
+  text-wrap: balance;
+}
+
+.intro__hint {
+  font-weight: 700;
+  color: var(--c-text-muted);
+}
+
+/* Při otevírání texty odejdou, ať je vysouvající se dopis nepřekrývá */
+.intro.is-opening .intro__to {
+  opacity: 0;
+  transform: translateY(-8px);
+}
+
+.intro.is-opening .intro__hint {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
+.envelope {
+  /* růžová podšívka se srdíčky */
+  --env-liner-pattern: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' fill-opacity='.5' d='M12 18s-5-3-6.4-6.1C4.6 9.6 6 7 8.5 7c1.4 0 2.4.8 2.9 1.6.2.3.5.3.7 0 .5-.8 1.5-1.6 2.9-1.6 2.5 0 3.9 2.6 2.9 4.9C17 15 12 18 12 18z'/%3E%3C/svg%3E");
+  position: relative;
+  width: min(320px, 84vw);
+  aspect-ratio: 3 / 2;
+  padding: 0;
+  border: 0;
+  border-radius: 10px;
+  background: none;
+  cursor: pointer;
+  perspective: 1000px;
+  touch-action: manipulation;
+  animation: envelope-nudge 3.4s ease-in-out 1s infinite;
+  transition:
+    transform 520ms cubic-bezier(0.55, 0, 0.75, 0.3),
+    opacity 420ms ease 80ms;
+}
+
+.envelope.is-open {
+  animation: none;
+  cursor: default;
+}
+
+/* Když se dopis zvětšuje do karty, obálka spadne dolů */
+.intro.is-leaving .envelope {
+  opacity: 0;
+  transform: translateY(90px) rotate(4deg);
+}
+
+.envelope__back,
+.envelope__letter,
+.envelope__pocket,
+.envelope__flap-shadow,
+.envelope__flap,
+.envelope__seal {
+  position: absolute;
+  display: block;
+}
+
+/* Vnitřek obálky s podšívkou */
+.envelope__back {
+  inset: 0;
+  border-radius: 10px;
+  background-color: var(--c-env-liner);
+  background-image: var(--env-liner-pattern);
+  background-size: 22px 22px;
+  box-shadow:
+    0 30px 50px -24px rgba(74, 31, 61, 0.45),
+    0 10px 20px -12px rgba(74, 31, 61, 0.25);
+}
+
+/* Dopis – vyjede celý ven, pak se z něj stane karta */
+.envelope__letter {
+  z-index: 1;
+  top: 6%;
+  left: 6%;
+  right: 6%;
+  height: 88%;
+  display: flex;
+  justify-content: center;
+  padding: 16% 14px 0;
+  border-radius: 8px;
+  background: var(--c-surface);
+  box-shadow: 0 2px 10px rgba(74, 31, 61, 0.16);
+  transition: transform 720ms var(--ease-out);
+}
+
+.envelope__letter-text {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.05rem;
+  line-height: 1.3;
+  color: var(--c-primary-strong);
+  text-wrap: balance;
+  transition: opacity 200ms ease;
+}
+
+/* Přední kapsa: boční chlopně (tmavší ke krajům) */
+.envelope__pocket {
+  z-index: 2;
+  inset: 0;
+  border-radius: 10px;
+  background: linear-gradient(90deg, var(--c-env-side) 0%, var(--c-env-paper) 50%, var(--c-env-side) 100%);
+  clip-path: polygon(0 0, 50% 56%, 100% 0, 100% 100%, 0 100%);
+}
+
+/* Jemný stín podél spodní chlopně */
+.envelope__pocket::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: rgba(110, 19, 57, 0.1);
+  clip-path: polygon(0 100%, 0 96%, 50% 49%, 100% 96%, 100% 100%);
+}
+
+/* Spodní chlopeň */
+.envelope__bottom {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: linear-gradient(0deg, var(--c-env-paper) 30%, var(--c-env-paper-2) 100%);
+  clip-path: polygon(0 100%, 50% 52%, 100% 100%);
+}
+
+/* Stín, který horní chlopeň vrhá na kapsu */
+.envelope__flap-shadow {
+  z-index: 3;
+  inset: 0;
+  opacity: 0.55;
+  filter: blur(3px);
+  transition: opacity 200ms ease;
+}
+
+.envelope__flap-shadow > span {
+  position: absolute;
+  inset: 0;
+  display: block;
+  background: rgba(110, 19, 57, 0.35);
+  clip-path: polygon(0 0, 100% 0, 50% 64%);
+}
+
+/* Horní chlopeň – dvě strany: papír zvenku, podšívka zevnitř */
+.envelope__flap {
+  z-index: 4;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 60%;
+  transform-origin: 50% 0;
+  transform-style: preserve-3d;
+  transition:
+    transform 560ms cubic-bezier(0.5, 0, 0.3, 1),
+    z-index 0s linear;
+}
+
+.envelope__flap-out,
+.envelope__flap-in {
+  position: absolute;
+  inset: 0;
+  display: block;
+  border-radius: 10px 10px 0 0;
+  clip-path: polygon(0 0, 100% 0, 50% 100%);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+}
+
+.envelope__flap-out {
+  background: linear-gradient(180deg, var(--c-env-paper-2) 0%, var(--c-env-paper) 65%, var(--c-env-side) 100%);
+}
+
+.envelope__flap-in {
+  background-color: var(--c-env-liner);
+  background-image: var(--env-liner-pattern);
+  background-size: 22px 22px;
+  transform: rotateY(180deg);
+}
+
+/* Vosková pečeť */
+.envelope__seal {
+  z-index: 5;
+  top: 60%;
+  left: 50%;
+  width: 62px;
+  height: 62px;
+  filter: drop-shadow(0 3px 3px rgba(74, 31, 61, 0.35));
+  transform: translate(-50%, -50%) rotate(-8deg);
+  transition: transform 260ms var(--ease-out), opacity 220ms ease;
+}
+
+.envelope__seal svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+@media (hover: hover) {
+  .envelope:not(.is-open):hover .envelope__flap {
+    transform: rotateX(16deg);
+  }
+
+  .envelope:not(.is-open):hover .envelope__seal {
+    transform: translate(-50%, -50%) rotate(-8deg) scale(1.06);
+  }
+}
+
+/* --- Otevírání: pečeť praskne → chlopeň se odklopí → dopis vyjede --- */
+.envelope.is-open .envelope__seal {
+  opacity: 0;
+  transform: translate(-50%, -50%) rotate(-24deg) scale(1.3);
+}
+
+.envelope.is-open .envelope__flap-shadow {
+  opacity: 0;
+}
+
+.envelope.is-open .envelope__flap {
+  z-index: 0;
+  transform: rotateX(180deg);
+  transition-delay: 160ms, 440ms;
+}
+
+.envelope.is-open .envelope__letter {
+  transform: translateY(-106%);
+  transition-delay: 520ms;
+}
+
+.envelope.is-open .envelope__letter-text {
+  opacity: 0;
+  transition-delay: 1500ms;
+}
+
+@keyframes envelope-nudge {
+  0%, 60%, 100% { transform: rotate(0); }
+  66% { transform: rotate(-3deg); }
+  74% { transform: rotate(3deg); }
+  82% { transform: rotate(-2deg); }
+  90% { transform: rotate(1deg); }
+}
+
+/* Dopis se zvětšuje do karty – obsah se ukáže až potom, postupně */
+.card.is-growing .step {
+  visibility: hidden;
+}
+
+.card.is-unfolding .step[data-step="1"] > * {
+  animation: unfold-in 460ms var(--ease-out) both;
+}
+
+.card.is-unfolding .step[data-step="1"] > :nth-child(2) { animation-delay: 70ms; }
+.card.is-unfolding .step[data-step="1"] > :nth-child(3) { animation-delay: 140ms; }
+.card.is-unfolding .step[data-step="1"] > :nth-child(4) { animation-delay: 210ms; }
+
+/* `translate` místo `transform`, ať se nezruší natočení polaroidu */
+@keyframes unfold-in {
+  from { opacity: 0; translate: 0 14px; }
+  to   { opacity: 1; translate: 0 0; }
 }
 
 /* ---------- Karta ---------- */
@@ -282,6 +595,53 @@ textarea {
   opacity: 1;
 }
 
+/* Tajná zpráva na „zadní straně“ polaroidu */
+.step[data-step="1"] .polaroid {
+  touch-action: manipulation; /* rychlé klepání nesmí zoomovat */
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+.polaroid__note {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  margin: 0;
+  padding: 16px;
+  border-radius: 3px;
+  background:
+    repeating-linear-gradient(180deg, transparent 0 25px, rgba(210, 60, 119, 0.12) 25px 26px),
+    linear-gradient(170deg, #ffffff 0%, var(--c-polaroid) 45%, #f6f1ec 100%);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.92rem;
+  line-height: 1.35;
+  color: var(--c-primary-strong);
+  white-space: pre-line;
+  visibility: hidden;
+}
+
+.polaroid.is-flipped .polaroid__note {
+  visibility: visible;
+}
+
+.polaroid.is-flipped .photo,
+.polaroid.is-flipped .polaroid__caption {
+  visibility: hidden;
+}
+
+.polaroid.is-turning {
+  animation: polaroid-turn 560ms ease-in-out;
+}
+
+@keyframes polaroid-turn {
+  0%   { transform: perspective(700px) rotate(-3deg) rotateY(0); }
+  50%  { transform: perspective(700px) rotate(-3deg) rotateY(90deg); }
+  100% { transform: perspective(700px) rotate(-3deg) rotateY(0); }
+}
+
 .polaroid--small {
   padding: 8px 8px 24px;
   transform: rotate(3deg);
@@ -318,8 +678,23 @@ textarea {
   color: var(--c-text-muted);
 }
 
-.taunt.is-new {
+.taunt.is-new,
+.reaction.is-new {
   animation: taunt-pop var(--dur) var(--ease-out);
+}
+
+/* Nápověda / reakce nad kartami – rezervuje 2 řádky, ať karty neposkakují */
+.reaction {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 3em;
+  text-wrap: balance;
+}
+
+.reaction.is-reaction {
+  font-weight: 800;
+  color: var(--c-primary-strong);
 }
 
 @keyframes taunt-pop {
@@ -357,7 +732,9 @@ textarea {
 .activity:focus-visible,
 .cal-nav:focus-visible,
 .cal-day:focus-visible,
-.time-chip:focus-visible {
+.time-chip:focus-visible,
+.pick-chip:focus-visible,
+.envelope:focus-visible {
   outline: 3px solid var(--c-focus);
   outline-offset: 3px;
 }
@@ -459,6 +836,40 @@ textarea {
 .btn-link:hover {
   color: var(--c-primary-strong);
   background-color: var(--c-primary-soft);
+}
+
+/* Vedlejší tlačítko (Přidat do kalendáře) */
+.btn--ghost {
+  min-height: 48px;
+  padding: 10px 18px;
+  font-size: 0.95rem;
+  color: var(--c-primary-strong);
+  background: var(--c-surface);
+  border: 2px solid var(--c-border);
+  box-shadow: var(--shadow-soft);
+  text-decoration: none;
+  transition:
+    transform var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) ease,
+    background-color var(--dur-fast) ease;
+}
+
+.btn--ghost svg {
+  flex: none;
+  width: 18px;
+  height: 18px;
+}
+
+@media (hover: hover) {
+  .btn--ghost:hover {
+    border-color: var(--c-border-hover);
+    background: var(--c-primary-soft);
+    transform: translateY(-2px);
+  }
+}
+
+.btn--ghost:active {
+  transform: scale(0.97);
 }
 
 .actions {
@@ -678,7 +1089,8 @@ textarea {
   mask-image: linear-gradient(to right, #000 calc(100% - 28px), transparent);
 }
 
-.time-chip {
+.time-chip,
+.pick-chip {
   flex: 0 0 auto;
   min-width: 70px;
   min-height: 44px;
@@ -700,13 +1112,15 @@ textarea {
 }
 
 @media (hover: hover) {
-  .time-chip:not(:disabled):not([aria-pressed="true"]):hover {
+  .time-chip:not(:disabled):not([aria-pressed="true"]):hover,
+  .pick-chip:not([aria-pressed="true"]):hover {
     border-color: var(--c-border-hover);
     transform: translateY(-2px);
   }
 }
 
-.time-chip[aria-pressed="true"] {
+.time-chip[aria-pressed="true"],
+.pick-chip[aria-pressed="true"] {
   color: var(--c-on-primary);
   background: linear-gradient(135deg, var(--c-primary), var(--c-primary-strong));
   border-color: transparent;
@@ -729,6 +1143,7 @@ textarea {
 }
 
 .field__label {
+  margin: 0;
   padding-left: 4px;
   font-weight: 800;
   font-size: 0.95rem;
@@ -773,6 +1188,18 @@ textarea {
   font-weight: 700;
   font-size: 0.95rem;
   text-align: left;
+}
+
+/* ---------- Otázka na odvoz ---------- */
+.pick-chips {
+  display: flex;
+  gap: 8px;
+}
+
+.pick-chip {
+  flex: 1 1 0;
+  padding: 8px 12px;
+  line-height: 1.2;
 }
 
 /* ---------- Karty aktivit ---------- */
@@ -862,6 +1289,27 @@ textarea {
 .activity[aria-pressed="true"] .activity__check {
   opacity: 1;
   transform: scale(1);
+}
+
+/* „Překvap mě“ – přes celou šířku, emoji vedle textu */
+.activity--wide {
+  grid-column: 1 / -1;
+  flex-direction: row;
+  gap: 10px;
+  min-height: 60px;
+  border-style: dashed;
+}
+
+.activity--wide[aria-pressed="true"] {
+  border-style: solid;
+}
+
+.activity--wide .activity__emoji {
+  font-size: 1.6rem;
+}
+
+.activity--wide .activity__label {
+  font-size: 1rem;
 }
 
 /* ---------- Shrnutí ---------- */
@@ -957,6 +1405,73 @@ textarea {
   font-weight: 700;
   font-size: 1.2rem;
   color: var(--c-primary-strong);
+}
+
+/* Odpočet do rande */
+.countdown {
+  width: 100%;
+  margin-top: 4px;
+}
+
+.countdown__label,
+.add-cal__label {
+  margin: 0 0 8px;
+  font-weight: 800;
+  font-size: 0.95rem;
+  color: var(--c-text-muted);
+}
+
+.countdown__grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  max-width: 320px;
+  margin: 0 auto;
+}
+
+.countdown__unit {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 4px 6px;
+  background: var(--c-surface-soft);
+  border: 2px solid var(--c-border);
+  border-radius: var(--radius-sm);
+}
+
+.countdown__num {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.55rem;
+  line-height: 1.2;
+  font-variant-numeric: tabular-nums;
+  color: var(--c-primary-strong);
+}
+
+.countdown__name {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--c-text-muted);
+}
+
+.countdown__done {
+  margin: 0;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.4rem;
+  color: var(--c-primary-strong);
+}
+
+/* Přidat do kalendáře */
+.add-cal {
+  width: 100%;
+}
+
+.add-cal__row {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
 }
 
 /* ---------- Plovoucí srdíčka na pozadí ---------- */
@@ -1143,6 +1658,15 @@ textarea {
 
   .btn--yes {
     transition: scale 150ms ease, translate 150ms ease;
+  }
+
+  /* Obálka se otevře hned, bez odklápění */
+  .envelope,
+  .envelope__flap,
+  .envelope__letter,
+  .intro__to,
+  .intro__hint {
+    transition: none !important;
   }
 
   .spinner {

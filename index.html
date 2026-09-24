@@ -20,14 +20,59 @@
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Nunito:wght@500;700;800&family=Playpen+Sans:wght@700&display=swap">
 
-  <link rel="stylesheet" href="./style.css?v=4">
+  <link rel="stylesheet" href="./style.css?v=6">
 </head>
-<body>
+<body class="intro-open">
   <!-- Plovoucí srdíčka a třpytky na pozadí (generuje script.js) -->
   <div class="bg-hearts" id="bg-hearts" aria-hidden="true"></div>
 
   <!-- Pomocný prvek pro zjištění safe-area insetů (výřez / notch) -->
   <div class="safe-area-probe" id="safe-area-probe" aria-hidden="true"></div>
+
+  <!-- ============ ÚVOD: zalepená obálka ============
+       Po klepnutí praskne pečeť, odklopí se chlopeň, vyjede dopis
+       a ten se zvětší do karty s otázkou. -->
+  <div class="intro" id="intro">
+    <p class="intro__to" data-text="introTo">Tohle je pro tebe 💌</p>
+    <button type="button" class="envelope" id="envelope" aria-describedby="intro-hint">
+      <!-- vnitřek s podšívkou -->
+      <span class="envelope__back" aria-hidden="true"></span>
+      <!-- dopis -->
+      <span class="envelope__letter" id="envelope-letter" aria-hidden="true">
+        <span class="envelope__letter-text" data-text="introLetter">Mám pro tebe jednu otázku…</span>
+      </span>
+      <!-- přední kapsa (boční + spodní chlopeň) -->
+      <span class="envelope__pocket" aria-hidden="true"><span class="envelope__bottom"></span></span>
+      <!-- stín horní chlopně na kapse -->
+      <span class="envelope__flap-shadow" aria-hidden="true"><span></span></span>
+      <!-- horní chlopeň: venku papír, uvnitř podšívka -->
+      <span class="envelope__flap" aria-hidden="true">
+        <span class="envelope__flap-out"></span>
+        <span class="envelope__flap-in"></span>
+      </span>
+      <!-- vosková pečeť -->
+      <span class="envelope__seal" aria-hidden="true">
+        <svg viewBox="0 0 64 64">
+          <defs>
+            <radialGradient id="wax-grad" cx="38%" cy="32%" r="75%">
+              <stop offset="0" stop-color="#e2578f"/>
+              <stop offset=".55" stop-color="#c0336b"/>
+              <stop offset="1" stop-color="#8a1c49"/>
+            </radialGradient>
+          </defs>
+          <path fill="url(#wax-grad)" d="M59.7 32.0C59.3 36.1 57.9 39.9 56.3 43.7C54.7 47.5 53.2 52.4 50.2 54.8C47.1 57.2 42.0 57.1 37.9 58.0C33.8 58.8 29.5 60.6 25.6 59.9C21.7 59.3 17.5 56.6 14.6 53.8C11.7 51.1 9.9 47.2 8.1 43.5C6.2 39.9 3.5 35.8 3.5 32.0C3.5 28.2 6.3 24.2 8.2 20.5C10.0 16.8 11.4 12.4 14.4 9.9C17.4 7.5 22.2 6.7 26.1 6.1C30.0 5.4 34.0 5.3 37.9 6.0C41.9 6.6 46.1 7.8 49.6 10.0C53.1 12.2 57.3 15.3 59.0 19.0C60.7 22.7 60.2 27.9 59.7 32.0Z"/>
+          <circle cx="32.6" cy="32.6" r="19" fill="none" stroke="#6e1339" stroke-opacity=".45" stroke-width="2"/>
+          <circle cx="31.4" cy="31.4" r="19" fill="none" stroke="#ffffff" stroke-opacity=".28" stroke-width="1.2"/>
+          <g transform="translate(20 20.5)">
+            <path fill="#6e1339" fill-opacity=".55" transform="translate(.8 .8)" d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4.2.4.8.4 1 0 .7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/>
+            <path fill="#f58bb4" d="M12 21s-7.5-4.6-9.6-9.2C.9 8.4 3 4.5 6.7 4.5c2.1 0 3.6 1.2 4.3 2.4.2.4.8.4 1 0 .7-1.2 2.2-2.4 4.3-2.4 3.7 0 5.8 3.9 4.3 7.3C19.5 16.4 12 21 12 21z"/>
+          </g>
+        </svg>
+      </span>
+      <span class="visually-hidden" data-text="introOpen">Otevřít obálku</span>
+    </button>
+    <p class="intro__hint" id="intro-hint" data-text="introHint">Klepni na obálku a otevři ji</p>
+  </div>
 
   <main class="card" id="card">
 
@@ -39,6 +84,8 @@
           <span class="photo__fallback" role="img" aria-label="Zamilovaný smajlík">🥰</span>
         </div>
         <figcaption class="polaroid__caption" data-text="photoCaption">my dva 🤍</figcaption>
+        <!-- Tajná zpráva na „zadní straně“ – ukáže se po 5 rychlých klepnutích na fotku -->
+        <p class="polaroid__note" id="secret-note"></p>
       </figure>
 
       <h1 class="title title--script" id="question" tabindex="-1" data-text="question">Půjdeš se mnou na rande? 🥺</h1>
@@ -89,10 +136,19 @@
     <!-- ============ KROK 3: Co budeme dělat ============ -->
     <section class="step" data-step="3" aria-labelledby="step3-title" hidden>
       <h2 class="title" id="step3-title" tabindex="-1" data-text="step3Title">Na co máš chuť? 😋</h2>
-      <p class="subtitle" data-text="step3Subtitle">Klidně vyber víc možností.</p>
+      <!-- Nápověda – po výběru karty se tu ukáže vtipná reakce -->
+      <p class="subtitle reaction" id="activity-reaction" aria-live="polite" data-text="step3Subtitle">Klidně vyber víc možností.</p>
 
       <!-- Karty aktivit se generují z pole ACTIVITIES ve script.js -->
       <div class="activity-grid" id="activity-grid" role="group" aria-labelledby="step3-title"></div>
+
+      <div class="field">
+        <p class="field__label" id="pickup-label" data-text="pickupLabel">Mám pro tebe přijet? 🚗</p>
+        <div class="pick-chips" role="group" aria-labelledby="pickup-label">
+          <button type="button" class="pick-chip" data-pickup="yes" aria-pressed="false" data-text="pickupYes">Jo, vyzvedni mě</button>
+          <button type="button" class="pick-chip" data-pickup="no" aria-pressed="false" data-text="pickupNo">Sejdeme se tam</button>
+        </div>
+      </div>
 
       <div class="field">
         <label class="field__label" for="other-idea" data-text="otherIdeaLabel">Nebo mě napadá něco jiného…</label>
@@ -140,10 +196,37 @@
       <h2 class="title title--script" id="thanks-title" tabindex="-1" data-text="thanksTitle">Těším se! 💕</h2>
       <p class="subtitle" data-text="thanksSubtitle">Odpověď už letí za mnou 💌</p>
       <p class="signature" data-text="thanksSignature"></p>
+
+      <!-- Odpočet do rande -->
+      <div class="countdown" role="timer" aria-labelledby="countdown-label">
+        <p class="countdown__label" id="countdown-label" data-text="countdownLabel">Do rande zbývá</p>
+        <div class="countdown__grid" id="countdown-grid">
+          <div class="countdown__unit"><span class="countdown__num" data-cd="d">0</span><span class="countdown__name" data-cd-name="d">dní</span></div>
+          <div class="countdown__unit"><span class="countdown__num" data-cd="h">00</span><span class="countdown__name">hod</span></div>
+          <div class="countdown__unit"><span class="countdown__num" data-cd="m">00</span><span class="countdown__name">min</span></div>
+          <div class="countdown__unit"><span class="countdown__num" data-cd="s">00</span><span class="countdown__name">sek</span></div>
+        </div>
+        <p class="countdown__done" id="countdown-done" data-text="countdownDone" hidden>Je to tady! 💕</p>
+      </div>
+
+      <!-- Přidat do kalendáře (odkazy doplní script.js) -->
+      <div class="add-cal">
+        <p class="add-cal__label" data-text="calendarLabel">Ať na to nezapomeneš:</p>
+        <div class="add-cal__row">
+          <a class="btn btn--ghost" id="cal-google" href="#" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><path d="M21 13V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/><path d="M3 10h18"/><path d="M16 19h6"/><path d="M19 16v6"/></svg>
+            <span data-text="calendarGoogle">Google Kalendář</span>
+          </a>
+          <a class="btn btn--ghost" id="cal-ics" href="#" download="rande.ics">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 2v4"/><path d="M16 2v4"/><path d="M21 13V6a2 2 0 0 0-2-2H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h8"/><path d="M3 10h18"/><path d="M16 19h6"/><path d="M19 16v6"/></svg>
+            <span data-text="calendarIcs">iPhone / Outlook</span>
+          </a>
+        </div>
+      </div>
     </section>
 
   </main>
 
-  <script src="./script.js?v=4" defer></script>
+  <script src="./script.js?v=6" defer></script>
 </body>
 </html>

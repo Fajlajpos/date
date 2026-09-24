@@ -23,6 +23,15 @@ const CONFIG = {
    {jmeno5} = CONFIG.herNameVocative (nebo herName)
    {ja}     = CONFIG.myName                                  */
 const TEXTS = {
+  // Úvodní obálka
+  introTo: "{jmeno5}, tohle je pro tebe 💌",
+  introLetter: "Mám pro tebe jednu otázku…",
+  introHint: "Klepni na obálku a otevři ji",
+  introOpen: "Otevřít obálku",
+
+  // Tajná zpráva – ukáže se, když 5× rychle za sebou klepne na fotku
+  secretNote: "Psst… našla jsi tajnou zprávu 🤫\n\nUž teď se na tebe hrozně těším 💖\n– {ja}",
+
   question: "{jmeno5}, půjdeš se mnou na rande? 🥺",
   tauntStart: "Nápověda: správná odpověď je ta růžová 😇",
   yesButton: "ANO 💖",
@@ -41,6 +50,12 @@ const TEXTS = {
   otherIdeaLabel: "Nebo napiš, co by se ti líbilo ✍️",
   otherIdeaPlaceholder: "Třeba bowling, zmrzlina, výlet na kolech…",
   messageLabel: "Vzkaz pro mě 💌 (nepovinné, ale potěší)",
+  activityRemoved: "Dobře, škrtám ✏️",           // když kartu zase odznačí
+  pickupLabel: "Mám pro tebe přijet? 🚗",
+  pickupYes: "Jo, vyzvedni mě",
+  pickupNo: "Sejdeme se tam",
+  pickupSummaryYes: "Přijedu pro tebe 🚗",         // ve shrnutí a v kalendáři
+  pickupSummaryNo: "Sejdeme se na místě 📍",
 
   step4Title: "Takže je to domluvené 📝",
   sendButton: "Odeslat 💌",
@@ -48,10 +63,19 @@ const TEXTS = {
   retryButton: "Zkusit znovu 💌",
   sendError: "Holub se cestou ztratil 🥺 Zkus to prosím znovu.",
   missingKey: "Chybí adresa pro odeslání 🔑 Doplň CONFIG.apiUrl ve script.js.",
+  // Tyhle dvě uvidíš jen při zkoušení na počítači (na GitHub Pages odesílání funguje)
+  sendErrorFile: "Web je otevřený jako soubor – odtud odeslat nejde 📂 Otevři ho přes https://fajlajpos.github.io/date/ nebo přes npm start (http://localhost:3000).",
+  sendErrorActivation: "FormSubmit ještě nezná adresu {adresa} 🔑 V Gmailu najdi e-mail od FormSubmit, klikni na „Activate Form“ a zkus to znovu.",
 
   thanksTitle: "Těším se! 💕",
   thanksSubtitle: "Odpověď už letí za mnou. Teď už nemůžeš couvnout 😌",
   thanksSignature: "FILIP (TRUBKA)",
+  countdownLabel: "Do rande zbývá",
+  countdownDone: "Je to tady! 💕",
+  calendarLabel: "Ať na to nezapomeneš:",
+  calendarGoogle: "Google Kalendář",
+  calendarIcs: "iPhone / Outlook",
+  calendarTitle: "Rande s Filipem 💕",             // název události v kalendáři
 
   continue: "Pokračovat →",
   back: "← Zpět",
@@ -78,14 +102,18 @@ const TAUNTS = [
   "Pořád čekám na správnou odpověď 🥰"
 ];
 
-/* ---------- 4) AKTIVITY (karty v kroku 3) ---------- */
+/* ---------- 4) AKTIVITY (karty v kroku 3) ----------
+   reaction  = hláška, která se ukáže po výběru karty
+   pickup    = po výběru rovnou zaškrtne „Jo, přijeď pro mě“
+   exclusive = vybírá se samotná (zruší ostatní) a je přes celou šířku */
 const ACTIVITIES = [
-  { id: "kino",       emoji: "🎬", label: "Kino" },
-  { id: "fastfood",   emoji: "🍔", label: "Fast food" },
-  { id: "netflix",    emoji: "📺", label: "Netflix" },
-  { id: "prochazka",  emoji: "🌸", label: "Procházka" },
-  { id: "projizdka",  emoji: "🚗", label: "Projížďka autem" },
-  { id: "testoviny",  emoji: "🍝", label: "Těstoviny" }
+  { id: "kino",       emoji: "🎬", label: "Kino",            reaction: "Popcorn platím já, film vybíráš ty 🍿" },
+  { id: "fastfood",   emoji: "🍔", label: "Fast food",       reaction: "Hranolky navíc? Samozřejmě 🍟" },
+  { id: "netflix",    emoji: "📺", label: "Netflix",         reaction: "Netflix a… jen Netflix. Opravdu 😇" },
+  { id: "prochazka",  emoji: "🌸", label: "Procházka",       reaction: "Procházka a dlouhý povídání, beru 🌙" },
+  { id: "projizdka",  emoji: "🚗", label: "Projížďka autem", reaction: "Přijedu pro tebe, playlist vybíráš ty 🎶", pickup: true },
+  { id: "testoviny",  emoji: "🍝", label: "Těstoviny",       reaction: "Uvařím, nebo půjdeme ven? Napiš mi to dole 👇" },
+  { id: "prekvapeni", emoji: "🎁", label: "Překvap mě",      reaction: "Dobře, něco vymyslím. Nebudeš litovat 😏", exclusive: true }
 ];
 
 /* ---------- 5) ČASY A KALENDÁŘ (krok 2) ---------- */
@@ -94,6 +122,7 @@ const TIME_TO = "22:00";        // poslední nabízený čas
 const TIME_STEP = 30;           // po kolika minutách
 const TIME_PREFERRED = "17:00"; // na tenhle čas se řada časů na začátku posune
 const MONTHS_AHEAD = 12;        // kolik měsíců dopředu jde v kalendáři listovat
+const DATE_DURATION = 120;      // jak dlouho rande trvá v jejím kalendáři (minuty)
 
 /* ---------- Konstanty chování ---------- */
 const WEB3FORMS_URL = "https://api.web3forms.com/submit";
@@ -102,6 +131,8 @@ const NO_PROXIMITY = 120;   // px – jak blízko může kurzor k NE, než uteč
 const NO_EDGE = 16;         // px – minimální okraj od kraje obrazovky
 const YES_SCALE_STEP = 0.08;
 const YES_SCALE_MAX = 1.6;
+const SECRET_TAPS = 5;      // kolikrát rychle klepnout na fotku pro tajnou zprávu
+const SECRET_TAP_GAP = 700; // ms – max. pauza mezi klepnutími
 
 /* =========================================================
    Odtud dál už nic měnit nemusíš 🙂
@@ -109,11 +140,14 @@ const YES_SCALE_MAX = 1.6;
 
 /* ---------- Stav aplikace (žádný localStorage) ---------- */
 const state = {
+  intro: true,          // je ještě vidět zalepená obálka?
   step: 1,
   noAttempts: 0,
+  secretFound: false,
   date: "",
   time: "",
   activities: new Set(),
+  pickup: "",           // "yes" | "no" | "" (neodpověděla)
   otherIdea: "",
   message: "",
   sending: false,
@@ -124,6 +158,7 @@ const $ = (sel, root = document) => root.querySelector(sel);
 const $$ = (sel, root = document) => Array.from(root.querySelectorAll(sel));
 
 const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)");
+const wait = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
 /** Je hodnota v CONFIG ještě placeholder typu „[NĚCO]“? */
 function isPlaceholder(value) {
@@ -151,10 +186,13 @@ function init() {
   applyTexts();
   setupPhotos();
   createBackground();
+  setupIntro();
   setupStep1();
+  setupSecret();
   setupStep2();
   setupStep3();
   setupStep4();
+  setupStep5();
 
   // Tlačítka „← Zpět“
   $$("[data-back]").forEach((btn) => {
@@ -208,6 +246,68 @@ function setupPhotos() {
 }
 
 /* =========================================================
+   Úvod – zalepená obálka
+   Po klepnutí praskne pečeť, odklopí se chlopeň, vyjede dopis
+   a ten se zvětší do karty s otázkou.
+   ========================================================= */
+const LETTER_OUT_MS = 1720; // pečeť + chlopeň + vysunutí dopisu + chvilka na přečtení (viz style.css)
+const LETTER_GROW_MS = 700; // zvětšení dopisu do karty
+
+function setupIntro() {
+  const intro = $("#intro");
+  const envelope = $("#envelope");
+  const letter = $("#envelope-letter");
+  const card = $("#card");
+
+  function finishIntro() {
+    intro.hidden = true;
+    document.body.classList.remove("intro-open");
+    state.intro = false;
+    questionEl.focus({ preventScroll: true });
+  }
+
+  envelope.addEventListener("click", async () => {
+    if (envelope.classList.contains("is-open")) return;
+    envelope.classList.add("is-open");
+    intro.classList.add("is-opening");
+
+    if (prefersReducedMotion.matches) {
+      finishIntro();
+      return;
+    }
+
+    // 1) Pečeť, chlopeň a dopis běží v CSS (transition-delay), tady jen počkáme
+    await wait(LETTER_OUT_MS);
+
+    // 2) FLIP: karta se vykreslí na svém místě, pak ji posadíme přesně na dopis
+    //    a necháme ji plynule „vyrůst“ zpátky do plné velikosti
+    const from = letter.getBoundingClientRect();
+    document.body.classList.remove("intro-open");
+    card.classList.add("is-growing");
+    const to = card.getBoundingClientRect();
+    card.style.transformOrigin = "0 0";
+    card.style.transform =
+      `translate(${from.left - to.left}px, ${from.top - to.top}px) ` +
+      `scale(${from.width / to.width}, ${from.height / to.height})`;
+    letter.style.visibility = "hidden";
+    intro.classList.add("is-leaving"); // obálka mezitím spadne dolů
+
+    void card.offsetWidth; // vynutí výchozí stav, ať se transition spustí
+    card.style.transition = `transform ${LETTER_GROW_MS}ms cubic-bezier(0.2, 0.8, 0.2, 1)`;
+    card.style.transform = "";
+    await wait(LETTER_GROW_MS);
+
+    // 3) Obsah karty (fotka, otázka, tlačítka) postupně naskočí
+    card.style.transition = "";
+    card.style.transformOrigin = "";
+    card.classList.remove("is-growing");
+    card.classList.add("is-unfolding");
+    finishIntro();
+    setTimeout(() => card.classList.remove("is-unfolding"), 800);
+  });
+}
+
+/* =========================================================
    Přepínání kroků
    ========================================================= */
 function goTo(step) {
@@ -231,6 +331,7 @@ function goTo(step) {
 
   if (step === 2) onEnterStep2();
   if (step === 4) renderSummary();
+  if (step === 5) onEnterStep5();
 
   window.scrollTo(0, 0);
   const heading = $(`.step[data-step="${step}"] [tabindex="-1"]`);
@@ -314,7 +415,7 @@ function isNoPositionValid() {
 /** Kontrola vzdálenosti kurzoru od NE (1× za snímek). */
 function checkProximity() {
   proximityFrame = 0;
-  if (!lastPointer || state.step !== 1 || noBtn.hidden) return;
+  if (!lastPointer || state.intro || state.step !== 1 || noBtn.hidden) return;
   const dNo = distanceToRect(lastPointer, noRect());
   if (dNo >= NO_PROXIMITY) return;
   // Když je kurzor blíž k ANO (míří na ANO), NE neutíká – nepočítá se to jako pokus
@@ -327,7 +428,7 @@ function checkProximity() {
  * @param pointer  kde je prst/kurzor (aby NE uteklo daleko od něj)
  */
 function escapeNo(pointer, { cooldown = 120 } = {}) {
-  if (state.step !== 1) return;
+  if (state.intro || state.step !== 1) return;
   const now = performance.now();
   // Jeden dotyk vyvolá pointerdown + touchstart (+ focus) → počítáme jen jednou
   if (now - lastEscapeAt < cooldown) return;
@@ -550,12 +651,47 @@ async function onYes() {
   goTo(2);
 }
 
+/* ---------- Tajná zpráva: 5× rychle klepnout na fotku ---------- */
+function setupSecret() {
+  const polaroid = $('.step[data-step="1"] .polaroid');
+  $("#secret-note").textContent = fill(TEXTS.secretNote);
+
+  let taps = 0;
+  let lastTap = 0;
+  polaroid.addEventListener("click", () => {
+    // Otočená zpátky jedním klepnutím
+    if (polaroid.classList.contains("is-flipped")) {
+      turnPolaroid(polaroid);
+      return;
+    }
+    const now = performance.now();
+    taps = now - lastTap < SECRET_TAP_GAP ? taps + 1 : 1;
+    lastTap = now;
+    if (taps < SECRET_TAPS) return;
+
+    taps = 0;
+    state.secretFound = true;
+    turnPolaroid(polaroid);
+    celebrate(polaroid, { count: 36 });
+  });
+}
+
+/** Otočí polaroid (v půlce otočky, kdy je vidět jen hrana, se vymění strana). */
+function turnPolaroid(el) {
+  if (el.classList.contains("is-turning")) return;
+  const half = prefersReducedMotion.matches ? 0 : 280;
+  el.classList.add("is-turning");
+  setTimeout(() => el.classList.toggle("is-flipped"), half);
+  setTimeout(() => el.classList.remove("is-turning"), half * 2);
+}
+
 /**
  * Konfety + padající srdíčka na <canvas>, bez knihoven.
  * Vrátí Promise, který se splní, až je čas přejít na další krok
  * (konfety ještě chvíli dopadávají přes krok 2).
+ * @param count  počet kousků (jinak podle šířky obrazovky)
  */
-function celebrate(originEl) {
+function celebrate(originEl, { count } = {}) {
   if (prefersReducedMotion.matches) return Promise.resolve();
 
   const canvas = document.createElement("canvas");
@@ -575,7 +711,7 @@ function celebrate(originEl) {
   const r = originEl.getBoundingClientRect();
   const ox = r.left + r.width / 2;
   const oy = r.top + r.height / 2;
-  const count = W < 500 ? 90 : 140;
+  count = count || (W < 500 ? 90 : 140);
 
   const particles = Array.from({ length: count }, (_, i) => {
     const angle = -Math.PI / 2 + (Math.random() - 0.5) * Math.PI * 1.1;
@@ -910,6 +1046,8 @@ const activityGrid = $("#activity-grid");
 const otherIdeaInput = $("#other-idea");
 const messageInput = $("#message");
 const toStep4Btn = $("#to-step-4");
+const reactionEl = $("#activity-reaction");
+const pickupChips = $$("[data-pickup]");
 
 const CHECK_ICON =
   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 6 9 17l-5-5"/></svg>';
@@ -918,7 +1056,7 @@ function setupStep3() {
   ACTIVITIES.forEach((act) => {
     const card = document.createElement("button");
     card.type = "button";
-    card.className = "activity";
+    card.className = act.exclusive ? "activity activity--wide" : "activity";
     card.dataset.id = act.id;
     card.setAttribute("aria-pressed", "false");
     card.innerHTML = `
@@ -928,13 +1066,12 @@ function setupStep3() {
     $(".activity__emoji", card).textContent = act.emoji;
     $(".activity__label", card).textContent = act.label;
 
-    card.addEventListener("click", () => {
-      if (state.activities.has(act.id)) state.activities.delete(act.id);
-      else state.activities.add(act.id);
-      card.setAttribute("aria-pressed", String(state.activities.has(act.id)));
-      updateStep3Button();
-    });
+    card.addEventListener("click", () => toggleActivity(act));
     activityGrid.appendChild(card);
+  });
+
+  pickupChips.forEach((chip) => {
+    chip.addEventListener("click", () => setPickup(chip.dataset.pickup));
   });
 
   otherIdeaInput.placeholder = TEXTS.otherIdeaPlaceholder;
@@ -947,6 +1084,50 @@ function setupStep3() {
   toStep4Btn.addEventListener("click", () => {
     if (hasActivityChoice()) goTo(4);
   });
+}
+
+function toggleActivity(act) {
+  if (state.activities.has(act.id)) {
+    state.activities.delete(act.id);
+    if (state.activities.size) showReaction(TEXTS.activityRemoved);
+    else showReaction(TEXTS.step3Subtitle, { isHint: true });
+  } else {
+    // „Překvap mě“ se vybírá samotná – zruší ostatní karty (a ostatní karty zruší ji)
+    ACTIVITIES.forEach((a) => {
+      if (act.exclusive || a.exclusive) state.activities.delete(a.id);
+    });
+    state.activities.add(act.id);
+    if (act.pickup && !state.pickup) setPickup("yes");
+    showReaction(act.reaction || TEXTS.step3Subtitle, { isHint: !act.reaction });
+  }
+
+  $$(".activity", activityGrid).forEach((card) => {
+    card.setAttribute("aria-pressed", String(state.activities.has(card.dataset.id)));
+  });
+  updateStep3Button();
+}
+
+/** Vtipná reakce nad kartami (s malou animací). */
+function showReaction(text, { isHint = false } = {}) {
+  reactionEl.textContent = fill(text);
+  reactionEl.classList.toggle("is-reaction", !isHint);
+  reactionEl.classList.remove("is-new");
+  void reactionEl.offsetWidth;
+  reactionEl.classList.add("is-new");
+}
+
+function setPickup(value) {
+  state.pickup = value;
+  pickupChips.forEach((chip) => {
+    chip.setAttribute("aria-pressed", String(chip.dataset.pickup === value));
+  });
+}
+
+/** Text o dopravě do shrnutí a kalendáře („“, když neodpověděla). */
+function pickupText() {
+  if (state.pickup === "yes") return TEXTS.pickupSummaryYes;
+  if (state.pickup === "no") return TEXTS.pickupSummaryNo;
+  return "";
 }
 
 /** Stačí vybrat kartu, NEBO napsat vlastní nápad. */
@@ -978,6 +1159,7 @@ function renderSummary() {
     { icon: "🕖", label: "Čas", value: state.time },
     { icon: "💗", label: "Program", value: selectedActivityLabels().join(", ") },
     { icon: "✍️", label: "Tvůj nápad", value: state.otherIdea.trim() },
+    { icon: "🚗", label: "Doprava", value: pickupText() },
     { icon: "💌", label: "Vzkaz", value: state.message.trim() }
   ].filter((row) => row.value);
 
@@ -1006,8 +1188,10 @@ function buildFields() {
     ["🕖 Čas", state.time],
     ["💗 Chce", selectedActivityLabels().join(", ")],
     ["✍️ Její nápad", state.otherIdea.trim()],
+    ["🚗 Přijet pro ni", { yes: "ano", no: "ne – sejdete se na místě" }[state.pickup] || ""],
     ["💌 Vzkaz", state.message.trim()],
     ["😏 Pokusů kliknout na NE", String(state.noAttempts)],
+    ["🤫 Našla tajnou zprávu", state.secretFound ? "ano 😏" : ""],
     ["🕐 Odpověděla", new Date().toLocaleString("cs-CZ")]
   ].filter(([, value]) => value);
 }
@@ -1106,6 +1290,13 @@ async function send() {
   if (state.sending || state.sent) return; // žádné dvojité odeslání
   sendError.hidden = true;
 
+  // Stránka otevřená dvojklikem (file://) – FormSubmit takové odeslání vždy odmítne
+  if (location.protocol === "file:") {
+    console.error("[Rande web] ❌ Web je otevřený jako soubor. Spusť ho přes server (npm start) nebo GitHub Pages.");
+    showSendError(TEXTS.sendErrorFile);
+    return;
+  }
+
   const request = buildRequest();
   if (!request) {
     console.error("[Rande web] ❌ Nelze odeslat – chybí CONFIG.apiUrl (nebo googleScriptUrl / myEmail / web3formsKey).");
@@ -1142,12 +1333,153 @@ async function send() {
     goTo(5);
   } catch (err) {
     console.error("[Rande web] Odeslání selhalo:", err);
-    showSendError(TEXTS.sendError);
+    // FormSubmit chce aktivaci zvlášť pro každou adresu webu (GitHub Pages, localhost…)
+    showSendError(/activat/i.test(err.message)
+      ? TEXTS.sendErrorActivation.replace("{adresa}", location.host)
+      : TEXTS.sendError);
     setSending(false, TEXTS.retryButton);
   } finally {
     clearTimeout(timeout);
     state.sending = false;
   }
+}
+
+/* =========================================================
+   KROK 5 – odpočet a „Přidat do kalendáře“
+   ========================================================= */
+const countdownGrid = $("#countdown-grid");
+const countdownDone = $("#countdown-done");
+const calGoogleLink = $("#cal-google");
+const calIcsLink = $("#cal-ics");
+let countdownTimer = 0;
+
+function setupStep5() {
+  // Na iPhonu / Macu dej .ics (Apple kalendář) jako první
+  if (/iPhone|iPad|iPod|Macintosh/.test(navigator.userAgent)) {
+    calIcsLink.parentElement.prepend(calIcsLink);
+  }
+}
+
+function onEnterStep5() {
+  startCountdown();
+  buildCalendarLinks();
+}
+
+/** Začátek rande jako Date (místní čas). */
+function dateStart() {
+  const [y, m, d] = state.date.split("-").map(Number);
+  const [hh, mm] = state.time.split(":").map(Number);
+  return new Date(y, m - 1, d, hh, mm);
+}
+
+/** 1 den, 2–4 dny, 5+ dní */
+function czPlural(n, [one, few, many]) {
+  if (n === 1) return one;
+  if (n >= 2 && n <= 4) return few;
+  return many;
+}
+
+function startCountdown() {
+  clearInterval(countdownTimer);
+  const target = dateStart().getTime();
+  const num = (key) => $(`[data-cd="${key}"]`, countdownGrid);
+
+  const tick = () => {
+    const left = Math.max(0, Math.floor((target - Date.now()) / 1000));
+    const days = Math.floor(left / 86400);
+    num("d").textContent = days;
+    num("h").textContent = pad2(Math.floor((left % 86400) / 3600));
+    num("m").textContent = pad2(Math.floor((left % 3600) / 60));
+    num("s").textContent = pad2(left % 60);
+    $('[data-cd-name="d"]', countdownGrid).textContent = czPlural(days, ["den", "dny", "dní"]);
+
+    if (!left) {
+      clearInterval(countdownTimer);
+      countdownGrid.hidden = true;
+      countdownDone.hidden = false;
+    }
+  };
+  tick();
+  countdownTimer = setInterval(tick, 1000);
+}
+
+/** Popis události v kalendáři – program, nápad a doprava. */
+function calendarDetails() {
+  return [
+    selectedActivityLabels().length ? `Program: ${selectedActivityLabels().join(", ")}` : "",
+    state.otherIdea.trim() ? `Nápad: ${state.otherIdea.trim()}` : "",
+    pickupText()
+  ].filter(Boolean).join("\n");
+}
+
+/** 2026-09-27 19:00 → „20260927T190000“ (plovoucí místní čas, bez časové zóny) */
+function icsStamp(date) {
+  return `${date.getFullYear()}${pad2(date.getMonth() + 1)}${pad2(date.getDate())}` +
+    `T${pad2(date.getHours())}${pad2(date.getMinutes())}00`;
+}
+
+function buildCalendarLinks() {
+  const start = dateStart();
+  const end = new Date(start.getTime() + DATE_DURATION * 60000);
+  const title = fill(TEXTS.calendarTitle);
+  const details = calendarDetails();
+
+  // Google Kalendář – otevře předvyplněnou událost
+  const google = new URL("https://calendar.google.com/calendar/render");
+  google.search = new URLSearchParams({
+    action: "TEMPLATE",
+    text: title,
+    dates: `${icsStamp(start)}/${icsStamp(end)}`,
+    details,
+    ctz: Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Prague"
+  }).toString();
+  calGoogleLink.href = google.toString();
+
+  // .ics soubor – iPhone, Outlook, ostatní kalendáře (s připomínkou 2 h předem)
+  const esc = (text) => String(text)
+    .replace(/\\/g, "\\\\").replace(/;/g, "\\;").replace(/,/g, "\\,").replace(/\n/g, "\\n");
+  const ics = [
+    "BEGIN:VCALENDAR",
+    "VERSION:2.0",
+    "PRODID:-//Rande web//CS",
+    "CALSCALE:GREGORIAN",
+    "METHOD:PUBLISH",
+    "BEGIN:VEVENT",
+    `UID:${Date.now()}-${Math.random().toString(36).slice(2)}@rande`,
+    `DTSTAMP:${new Date().toISOString().replace(/[-:]/g, "").replace(/\.\d{3}/, "")}`,
+    `DTSTART:${icsStamp(start)}`,
+    `DTEND:${icsStamp(end)}`,
+    `SUMMARY:${esc(title)}`,
+    details ? `DESCRIPTION:${esc(details)}` : "",
+    "BEGIN:VALARM",
+    "ACTION:DISPLAY",
+    "TRIGGER:-PT2H",
+    `DESCRIPTION:${esc(title)}`,
+    "END:VALARM",
+    "END:VEVENT",
+    "END:VCALENDAR"
+  ].filter(Boolean).map(foldIcsLine).join("\r\n");
+  calIcsLink.href = "data:text/calendar;charset=utf-8," + encodeURIComponent(ics);
+}
+
+/** Řádky v .ics smí mít max. 75 bajtů – delší se zalomí (pokračování začíná mezerou). */
+function foldIcsLine(line) {
+  const encoder = new TextEncoder();
+  const parts = [];
+  let current = "";
+  let bytes = 0;
+  for (const ch of line) {
+    const size = encoder.encode(ch).length;
+    if (bytes + size > 73) {
+      parts.push(current);
+      current = " ";
+      bytes = 1;
+    }
+    current += ch;
+    bytes += size;
+  }
+  parts.push(current);
+  return parts.join("\r\n");
 }
 
 /* =========================================================
