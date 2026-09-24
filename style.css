@@ -1407,64 +1407,17 @@ textarea {
   color: var(--c-primary-strong);
 }
 
-/* Odpočet do rande */
-.countdown {
+/* Přidat do kalendáře */
+.add-cal {
   width: 100%;
   margin-top: 4px;
 }
 
-.countdown__label,
 .add-cal__label {
   margin: 0 0 8px;
   font-weight: 800;
   font-size: 0.95rem;
   color: var(--c-text-muted);
-}
-
-.countdown__grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  max-width: 320px;
-  margin: 0 auto;
-}
-
-.countdown__unit {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: 8px 4px 6px;
-  background: var(--c-surface-soft);
-  border: 2px solid var(--c-border);
-  border-radius: var(--radius-sm);
-}
-
-.countdown__num {
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.55rem;
-  line-height: 1.2;
-  font-variant-numeric: tabular-nums;
-  color: var(--c-primary-strong);
-}
-
-.countdown__name {
-  font-size: 0.8rem;
-  font-weight: 700;
-  color: var(--c-text-muted);
-}
-
-.countdown__done {
-  margin: 0;
-  font-family: var(--font-display);
-  font-weight: 700;
-  font-size: 1.4rem;
-  color: var(--c-primary-strong);
-}
-
-/* Přidat do kalendáře */
-.add-cal {
-  width: 100%;
 }
 
 .add-cal__row {

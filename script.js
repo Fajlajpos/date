@@ -70,12 +70,11 @@ const TEXTS = {
   thanksTitle: "Těším se! 💕",
   thanksSubtitle: "Odpověď už letí za mnou. Teď už nemůžeš couvnout 😌",
   thanksSignature: "FILIP (TRUBKA)",
-  countdownLabel: "Do rande zbývá",
-  countdownDone: "Je to tady! 💕",
   calendarLabel: "Ať na to nezapomeneš:",
   calendarGoogle: "Google Kalendář",
   calendarIcs: "iPhone / Outlook",
-  calendarTitle: "Rande s Filipem 💕",             // název události v kalendáři
+  calendarTitle: "Rande s Filipem 💕",             // název události v jejím kalendáři
+  calendarTitleMine: "Rande s Klárou 💕",          // název události v tvém kalendáři (tlačítko v e-mailu)
 
   continue: "Pokračovat →",
   back: "← Zpět",
@@ -1196,6 +1195,27 @@ function buildFields() {
   ].filter(([, value]) => value);
 }
 
+/** Údaje pro HTML e-mail (šablona je v google-apps-script.gs). */
+function buildEmailData() {
+  const [y, m, d] = state.date.split("-").map(Number);
+  const date = new Date(y, m - 1, d);
+  return {
+    herName: CONFIG.herName,
+    myName: CONFIG.myName,
+    weekday: date.toLocaleDateString("cs-CZ", { weekday: "long" }),  // „neděle“
+    dayMonth: date.toLocaleDateString("cs-CZ", { day: "numeric", month: "long" }), // „27. září“
+    time: state.time,
+    activities: selectedActivityLabels(),
+    otherIdea: state.otherIdea.trim(),
+    pickup: state.pickup,              // "yes" | "no" | ""
+    message: state.message.trim(),
+    noAttempts: state.noAttempts,
+    secretFound: state.secretFound,
+    answeredAt: new Date().toLocaleString("cs-CZ"),
+    calendarUrl: googleCalendarUrl(fill(TEXTS.calendarTitleMine))
+  };
+}
+
 /** Čitelný text emailu. */
 function buildMessage() {
   const lines = buildFields().map(([label, value]) => `${label}: ${value}`);
@@ -1234,6 +1254,7 @@ function buildRequest() {
       body: {
         subject: fill(TEXTS.emailSubject),
         message: buildMessage(),
+        email: buildEmailData(), // z toho Apps Script poskládá hezký HTML e-mail
         botcheck: isBot ? "on" : ""
       }
     };
@@ -1345,13 +1366,10 @@ async function send() {
 }
 
 /* =========================================================
-   KROK 5 – odpočet a „Přidat do kalendáře“
+   KROK 5 – „Přidat do kalendáře“
    ========================================================= */
-const countdownGrid = $("#countdown-grid");
-const countdownDone = $("#countdown-done");
 const calGoogleLink = $("#cal-google");
 const calIcsLink = $("#cal-ics");
-let countdownTimer = 0;
 
 function setupStep5() {
   // Na iPhonu / Macu dej .ics (Apple kalendář) jako první
@@ -1361,7 +1379,6 @@ function setupStep5() {
 }
 
 function onEnterStep5() {
-  startCountdown();
   buildCalendarLinks();
 }
 
@@ -1370,37 +1387,6 @@ function dateStart() {
   const [y, m, d] = state.date.split("-").map(Number);
   const [hh, mm] = state.time.split(":").map(Number);
   return new Date(y, m - 1, d, hh, mm);
-}
-
-/** 1 den, 2–4 dny, 5+ dní */
-function czPlural(n, [one, few, many]) {
-  if (n === 1) return one;
-  if (n >= 2 && n <= 4) return few;
-  return many;
-}
-
-function startCountdown() {
-  clearInterval(countdownTimer);
-  const target = dateStart().getTime();
-  const num = (key) => $(`[data-cd="${key}"]`, countdownGrid);
-
-  const tick = () => {
-    const left = Math.max(0, Math.floor((target - Date.now()) / 1000));
-    const days = Math.floor(left / 86400);
-    num("d").textContent = days;
-    num("h").textContent = pad2(Math.floor((left % 86400) / 3600));
-    num("m").textContent = pad2(Math.floor((left % 3600) / 60));
-    num("s").textContent = pad2(left % 60);
-    $('[data-cd-name="d"]', countdownGrid).textContent = czPlural(days, ["den", "dny", "dní"]);
-
-    if (!left) {
-      clearInterval(countdownTimer);
-      countdownGrid.hidden = true;
-      countdownDone.hidden = false;
-    }
-  };
-  tick();
-  countdownTimer = setInterval(tick, 1000);
 }
 
 /** Popis události v kalendáři – program, nápad a doprava. */
@@ -1418,6 +1404,21 @@ function icsStamp(date) {
     `T${pad2(date.getHours())}${pad2(date.getMinutes())}00`;
 }
 
+/** Odkaz na předvyplněnou událost v Google Kalendáři. */
+function googleCalendarUrl(title) {
+  const start = dateStart();
+  const end = new Date(start.getTime() + DATE_DURATION * 60000);
+  const google = new URL("https://calendar.google.com/calendar/render");
+  google.search = new URLSearchParams({
+    action: "TEMPLATE",
+    text: title,
+    dates: `${icsStamp(start)}/${icsStamp(end)}`,
+    details: calendarDetails(),
+    ctz: Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Prague"
+  }).toString();
+  return google.toString();
+}
+
 function buildCalendarLinks() {
   const start = dateStart();
   const end = new Date(start.getTime() + DATE_DURATION * 60000);
@@ -1425,15 +1426,7 @@ function buildCalendarLinks() {
   const details = calendarDetails();
 
   // Google Kalendář – otevře předvyplněnou událost
-  const google = new URL("https://calendar.google.com/calendar/render");
-  google.search = new URLSearchParams({
-    action: "TEMPLATE",
-    text: title,
-    dates: `${icsStamp(start)}/${icsStamp(end)}`,
-    details,
-    ctz: Intl.DateTimeFormat().resolvedOptions().timeZone || "Europe/Prague"
-  }).toString();
-  calGoogleLink.href = google.toString();
+  calGoogleLink.href = googleCalendarUrl(title);
 
   // .ics soubor – iPhone, Outlook, ostatní kalendáře (s připomínkou 2 h předem)
   const esc = (text) => String(text)
